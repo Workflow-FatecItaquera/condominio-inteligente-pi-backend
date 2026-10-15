@@ -214,3 +214,14 @@ existência do `application.properties` e se possui as chaves `app.jwt.*`
 - Erro: `Connection refused`: <br> • Verificar se o MySQL está rodando
 
 - Erro: `ERROR 403` nas rotas API: <br> • Verificar se o token está sendo utilizado, se expirou ou se o papel do usuário não tem permissão.
+
+<br>
+
+## Equipe de desenvolvimento
+
+Projeto desenvolvido por:
+
+- **Pedro Fink** — [@finkDev](https://github.com/finkDev)
+- **Trinitydevs** — [@trinitydevs](https://github.com/trinitydevs)
+- **Kevyn Cavalcanti** — [@Kevyn-Cavalcanti](https://github.com/Kevyn-Cavalcanti)
+- **Lucas Retanero** — [@Lucas-Retanero](https://github.com/Lucas-Retanero)
