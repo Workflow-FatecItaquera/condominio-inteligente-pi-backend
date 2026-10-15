@@ -18,7 +18,7 @@ class VisitanteMapper {
             telefone = visitanteDto.telefone,
             email = visitanteDto.email,
             foto = visitanteDto.foto,
-            dataRegistro = visitanteDto.dataRegistro ?: java.time.LocalDateTime.now()
+            dataRegistro = visitanteDto.dataRegistro
         )
     }
 
@@ -32,6 +32,7 @@ class VisitanteMapper {
             telefone = visitante.telefone,
             email = visitante.email,
             foto = visitante.foto,
-    dataRegistro = visitante.dataRegistro ?: java.time.LocalDateTime.now()        )
+            dataRegistro = visitante.dataRegistro
+    )
     }
 }

@@ -30,6 +30,6 @@ data class VisitanteDTORequest(
     @Size(max = 255)
     val foto: String? = null,
 
-    @PastOrPresent
-    val dataRegistro: LocalDateTime? = null
+    val dataRegistro: LocalDateTime = LocalDateTime.now(),
+    
 )
