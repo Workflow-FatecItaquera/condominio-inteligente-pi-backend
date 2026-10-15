@@ -26,10 +26,10 @@
 ## Como Contribuir?
 
 ### Pré-requisitos:
-- Ter uma cópia do repositório https://github.com/Kevyn-Cavalcanti/condominio-backend-pi.git
+- Ter uma cópia do repositório https://github.com/Workflow-FatecItaquera/condominio-inteligente-pi-backend.git
 
 ```sh
-git clone https://github.com/Kevyn-Cavalcanti/condominio-backend-pi.git
+git clone https://github.com/Workflow-FatecItaquera/condominio-inteligente-pi-backend.git
 ```
 
 Além disso:
