@@ -67,9 +67,9 @@ class ReservaController(
     }
 
 
-    @GetMapping("/busca")
+    @GetMapping("/busca/{motivo}")
     fun buscarPorMotivo(
-        @RequestParam motivo: String
+        @RequestParam("motivo") motivo: String
     ): List<ReservaDTOResponse> {
         return service.buscarPorMotivo(motivo)
             .map { mapper.toResponse(it) }

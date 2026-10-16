@@ -27,7 +27,7 @@ class EncomendaController(
         return ResponseEntity.ok(mapper.toResponse(encomenda))
     }
 
-    @GetMapping("/busca")
+    @GetMapping("/busca/{codigo}")
     fun buscaPorCodigo(
         @RequestParam("codigo") codigo: String
     ): List<EncomendaDTOResponse> {

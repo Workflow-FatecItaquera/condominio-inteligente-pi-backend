@@ -66,9 +66,9 @@ class VisitanteController(
         }
     }
 
-    @GetMapping("/busca")
+    @GetMapping("/busca/{nome}")
     fun buscarPorNome(
-        @RequestParam nome: String
+        @RequestParam("nome") nome: String
     ): List<VisitanteDTOResponse> {
         return service.buscarPorNome(nome)
             .map { mapper.toResponse(it) }

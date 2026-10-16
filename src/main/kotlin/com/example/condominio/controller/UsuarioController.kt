@@ -28,6 +28,21 @@ class UsuarioController(
         return ResponseEntity.ok(mapper.toResponse(usuario))
     }
 
+    @GetMapping("/busca/{nome}")
+    fun lerPorNome(@PathVariable("nome") nome: String): ResponseEntity<List<UsuarioDTOResponse>> {
+        val usuario = service.lerPorNome(nome)
+
+        if (usuario.isEmpty()) {
+            return ResponseEntity.status(404).build()
+        }
+
+        val resposta = usuario.map {
+            mapper.toResponse(it)
+        }
+
+        return ResponseEntity.ok(resposta)
+    }
+
     @PutMapping("/{id}")
     fun atualizar(
         @PathVariable("id") id: Long,

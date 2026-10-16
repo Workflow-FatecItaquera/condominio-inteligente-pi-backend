@@ -27,7 +27,7 @@ class OcorrenciaController(
         return ResponseEntity.ok(mapper.toResponse(ocorrencia))
     }
 
-    @GetMapping("/busca")
+    @GetMapping("/busca/{categoria}")
     fun buscaPorCategoria(
         @RequestParam("categoria") categoria: String
     ): List<OcorrenciaDTOResponse> {

@@ -66,9 +66,9 @@ class AreaComumController(
         }
     }
 
-    @GetMapping("/busca")
+    @GetMapping("/busca/{nome}")
     fun buscarPorNome(
-        @RequestParam nome: String
+        @RequestParam("nome") nome: String
     ): List<AreaComumDTOResponse> {
         return service.buscarPorNome(nome)
             .map { mapper.toResponse(it) }

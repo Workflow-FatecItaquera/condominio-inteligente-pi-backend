@@ -15,10 +15,15 @@ class UsuarioService(
     private val passwordEncoder: PasswordEncoder
 ) : UserDetailsService {
 
-    override fun loadUserByUsername(username: String): UserDetails {
-        val usuario = repository.findByEmail(username)
-            ?: throw UsernameNotFoundException("Usuário não encontrado: $username")
+    override fun loadUserByUsername(email: String): UserDetails {
+        val usuario = repository.findByEmail(email)
+            ?: throw UsernameNotFoundException("Usuário não encontrado: $email")
         return UserDetailImplementation(usuario)
+    }
+
+    fun lerPorNome(nome: String): List<Usuario>
+    {
+        return repository.findByName(nome)
     }
 
     fun cadastrar(usuario: Usuario): Boolean {
