@@ -19,7 +19,7 @@ data class AreaComumDTORequest(
     @Positive
     val capacidade: Int = 0,
 
-    @Size(max = 255)
     val active: Boolean = true,
+    @Size(max = 255)
     val foto: String? = null
 )

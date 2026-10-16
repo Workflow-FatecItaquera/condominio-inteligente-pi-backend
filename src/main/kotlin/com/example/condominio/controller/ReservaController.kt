@@ -65,4 +65,13 @@ class ReservaController(
             ResponseEntity.status(500).body("Erro ao remover a reserva")
         }
     }
+
+
+    @GetMapping("/busca")
+    fun buscarPorMotivo(
+        @RequestParam motivo: String
+    ): List<ReservaDTOResponse> {
+        return service.buscarPorMotivo(motivo)
+            .map { mapper.toResponse(it) }
+    }
 }

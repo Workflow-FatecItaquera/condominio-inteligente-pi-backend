@@ -41,4 +41,8 @@ class AreaComumService(
 
         return true
     }
+
+    fun buscarPorNome(nome: String): List<AreaComum> {
+    return repository.buscarPorNome(nome)
+    }
 }

@@ -42,4 +42,8 @@ class VisitanteService(
 
         return true
     }
+
+    fun buscarPorNome(nome: String): List<Visitante> {
+    return repository.buscarPorNome(nome)
+    }
 }

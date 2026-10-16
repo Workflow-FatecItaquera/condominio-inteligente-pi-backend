@@ -65,4 +65,12 @@ class AreaComumController(
             ResponseEntity.status(500).body("Erro ao remover a área comum")
         }
     }
+
+    @GetMapping("/busca")
+    fun buscarPorNome(
+        @RequestParam nome: String
+    ): List<AreaComumDTOResponse> {
+        return service.buscarPorNome(nome)
+            .map { mapper.toResponse(it) }
+    }
 }

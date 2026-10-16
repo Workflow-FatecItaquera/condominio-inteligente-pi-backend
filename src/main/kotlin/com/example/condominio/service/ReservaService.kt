@@ -41,4 +41,8 @@ class ReservaService(
 
         return true
     }
+
+    fun buscarPorMotivo(motivo: String): List<Reserva> {
+    return repository.buscarPorMotivo(motivo)
+    }
 }

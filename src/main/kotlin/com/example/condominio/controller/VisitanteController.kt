@@ -65,4 +65,12 @@ class VisitanteController(
             ResponseEntity.status(500).body("Erro ao remover o visitante")
         }
     }
+
+    @GetMapping("/busca")
+    fun buscarPorNome(
+        @RequestParam nome: String
+    ): List<VisitanteDTOResponse> {
+        return service.buscarPorNome(nome)
+            .map { mapper.toResponse(it) }
+    }
 }
