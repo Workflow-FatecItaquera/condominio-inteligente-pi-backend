@@ -30,5 +30,8 @@ data class Visitante(
     val foto: String? = null,
 
     @Column(nullable = false)
+    val active: Boolean = true,
+
+    @Column(nullable = false)
     val dataRegistro: LocalDateTime = LocalDateTime.now()
 )

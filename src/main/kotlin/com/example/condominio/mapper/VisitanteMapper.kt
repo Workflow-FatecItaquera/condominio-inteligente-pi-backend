@@ -18,6 +18,7 @@ class VisitanteMapper {
             telefone = visitanteDto.telefone,
             email = visitanteDto.email,
             foto = visitanteDto.foto,
+            active = visitanteDto.active,
             dataRegistro = visitanteDto.dataRegistro
         )
     }
@@ -32,6 +33,7 @@ class VisitanteMapper {
             telefone = visitante.telefone,
             email = visitante.email,
             foto = visitante.foto,
+            active = visitante.active,
             dataRegistro = visitante.dataRegistro
     )
     }

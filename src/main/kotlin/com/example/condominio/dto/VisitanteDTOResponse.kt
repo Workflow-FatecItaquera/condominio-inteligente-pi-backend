@@ -11,5 +11,6 @@ data class VisitanteDTOResponse(
     val telefone: String? = null,
     val email: String? = null,
     val foto: String? = null,
+    val active: Boolean = true,
     val dataRegistro: LocalDateTime? = null
 )
