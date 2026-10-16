@@ -60,6 +60,12 @@ class SecurityConfiguration(
                 authorize(HttpMethod.PUT, "/api/condominios/**", hasAnyRole("SINDICO", "ADMIN"))
                 authorize("/api/condominios/**", hasRole("ADMIN"))
 
+                // cobranças, pagamentos e despesas
+                authorize(HttpMethod.GET, "/api/cobrancas/**", hasAnyRole("MORADOR", "SINDICO", "ADMIN"))
+                authorize("/api/cobrancas/**", hasAnyRole("SINDICO", "ADMIN"))
+                authorize("/api/pagamentos/**", hasAnyRole("SINDICO", "ADMIN"))
+                authorize("/api/despesas/**", hasAnyRole("SINDICO", "ADMIN"))
+
                 // apartamentos
                 authorize(HttpMethod.GET, "/api/apartamentos/**", authenticated)
                 authorize("/api/apartamentos/**", hasAnyRole("SINDICO", "ADMIN"))
