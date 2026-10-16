@@ -65,4 +65,12 @@ class CobrancaCondominialController(
             ResponseEntity.status(500).body("Erro ao remover a cobrança")
         }
     }
+
+    @GetMapping("/busca")
+    fun buscarPorDescricao(
+        @RequestParam descricao: String
+    ): List<CobrancaCondominialDTOResponse> {
+        return service.buscarPorDescricao(descricao)
+            .map { mapper.toResponse(it) }
+    }
 }

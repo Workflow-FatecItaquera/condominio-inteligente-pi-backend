@@ -44,4 +44,8 @@ class CobrancaCondominialService(
 
         return true
     }
+
+    fun buscarPorDescricao(descricao: String): List<CobrancaCondominial> {
+        return repository.buscarPorDescricao(descricao)
+    }
 }

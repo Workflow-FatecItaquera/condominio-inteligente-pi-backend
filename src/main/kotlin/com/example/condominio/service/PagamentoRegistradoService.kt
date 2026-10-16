@@ -44,4 +44,8 @@ class PagamentoRegistradoService(
 
         return true
     }
+
+    fun buscarPorFormaPagamento(formaPagamento: String): List<PagamentoRegistrado> {
+        return repository.buscarPorFormaPagamento(formaPagamento)
+    }
 }

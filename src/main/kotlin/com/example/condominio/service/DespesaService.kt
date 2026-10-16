@@ -44,4 +44,8 @@ class DespesaService(
 
         return true
     }
+
+    fun buscarPorCategoria(categoria: String): List<Despesa> {
+        return repository.buscarPorCategoria(categoria)
+    }
 }

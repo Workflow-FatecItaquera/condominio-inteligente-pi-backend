@@ -65,4 +65,12 @@ class DespesaController(
             ResponseEntity.status(500).body("Erro ao remover a despesa")
         }
     }
+
+    @GetMapping("/busca")
+    fun buscarPorCategoria(
+        @RequestParam categoria: String
+    ): List<DespesaDTOResponse> {
+        return service.buscarPorCategoria(categoria)
+            .map { mapper.toResponse(it) }
+    }
 }

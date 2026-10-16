@@ -65,4 +65,12 @@ class PagamentoRegistradoController(
             ResponseEntity.status(500).body("Erro ao remover o pagamento")
         }
     }
+
+    @GetMapping("/busca")
+    fun buscarPorFormaPagamento(
+        @RequestParam formaPagamento: String
+    ): List<PagamentoRegistradoDTOResponse> {
+        return service.buscarPorFormaPagamento(formaPagamento)
+            .map { mapper.toResponse(it) }
+    }
 }
