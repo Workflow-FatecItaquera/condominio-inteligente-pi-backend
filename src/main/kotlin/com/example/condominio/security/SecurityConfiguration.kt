@@ -83,6 +83,16 @@ class SecurityConfiguration(
                 authorize(HttpMethod.GET, "/api/areascomuns/**", authenticated)
                 authorize("/api/areascomuns/**", hasAnyRole("SINDICO", "ADMIN"))
 
+                // encomendas
+                authorize(HttpMethod.GET, "/api/encomendas/**", authenticated)
+                authorize(HttpMethod.DELETE, "/api/encomendas/**", hasRole("ADMIN"))
+                authorize("/api/encomendas/**", hasAnyRole("PORTARIA", "ADMIN"))
+
+                // ocorrências
+                authorize(HttpMethod.GET, "/api/ocorrencias/**", authenticated)
+                authorize(HttpMethod.POST, "/api/ocorrencias/**", authenticated)
+                authorize("/api/ocorrencias/**", hasAnyRole("SINDICO", "ADMIN"))
+
 
                 authorize(anyRequest, authenticated)
             }
