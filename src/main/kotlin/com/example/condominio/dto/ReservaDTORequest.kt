@@ -27,6 +27,5 @@ data class ReservaDTORequest(
     @Size(max = 30, message = "O campo recorrência precisa ser informado")
     val recorrencia: String = "",
 
-    @Size(max = 255)
     val active: Boolean = true,
 )
