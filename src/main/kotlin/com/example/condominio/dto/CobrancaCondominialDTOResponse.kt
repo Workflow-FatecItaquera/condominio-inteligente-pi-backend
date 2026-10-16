@@ -7,6 +7,7 @@ data class CobrancaCondominialDTOResponse(
     val id: Long = 0,
     val apartamentoId: Long = 0,
     val competencia: String = "",
+    val descricao: String = "",
     val valor: BigDecimal = BigDecimal.ZERO,
     val vencimento: LocalDate = LocalDate.now(),
     val active: Boolean = true

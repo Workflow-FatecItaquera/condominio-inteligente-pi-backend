@@ -17,6 +17,9 @@ data class CobrancaCondominial(
     @Column(length = 7, nullable = false)
     val competencia: String = "",
 
+    @Column(length = 255, nullable = false)
+    val descricao: String = "",
+
     @Column(precision = 10, scale = 2, nullable = false)
     val valor: BigDecimal = BigDecimal.ZERO,
 

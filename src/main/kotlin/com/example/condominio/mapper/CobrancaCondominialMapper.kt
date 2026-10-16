@@ -14,6 +14,7 @@ class CobrancaCondominialMapper {
             id = null,
             apartamento = Apartamento(id = cobrancaDto.apartamentoId),
             competencia = cobrancaDto.competencia,
+            descricao = cobrancaDto.descricao,
             valor = cobrancaDto.valor,
             vencimento = cobrancaDto.vencimento,
         )
@@ -24,6 +25,7 @@ class CobrancaCondominialMapper {
             id = cobranca.id ?: 0,
             apartamentoId = cobranca.apartamento.id ?: 0,
             competencia = cobranca.competencia,
+            descricao = cobranca.descricao,
             valor = cobranca.valor,
             vencimento = cobranca.vencimento,
             active = cobranca.active
