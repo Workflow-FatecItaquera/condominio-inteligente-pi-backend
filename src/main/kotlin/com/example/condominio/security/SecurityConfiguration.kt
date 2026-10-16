@@ -69,6 +69,20 @@ class SecurityConfiguration(
                 // apartamentos
                 authorize(HttpMethod.GET, "/api/apartamentos/**", authenticated)
                 authorize("/api/apartamentos/**", hasAnyRole("SINDICO", "ADMIN"))
+                
+                // visitantes
+                authorize(HttpMethod.GET, "/api/visitantes/**", authenticated)
+                authorize(HttpMethod.DELETE, "/api/visitantes/**", hasAnyRole("MORADOR", "ADMIN"))
+                authorize("/api/visitantes/**", hasAnyRole("MORADOR", "PORTARIA", "ADMIN"))
+
+                // reservas
+                authorize(HttpMethod.GET, "/api/reservas/**", authenticated)
+                authorize("/api/reservas/**", hasAnyRole("MORADOR", "SINDICO", "ADMIN"))
+
+                // áreas comuns
+                authorize(HttpMethod.GET, "/api/areascomuns/**", authenticated)
+                authorize("/api/areascomuns/**", hasAnyRole("SINDICO", "ADMIN"))
+
 
                 authorize(anyRequest, authenticated)
             }
