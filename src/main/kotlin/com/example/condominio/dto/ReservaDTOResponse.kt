@@ -9,5 +9,6 @@ data class ReservaDTOResponse(
     val inicio: LocalDateTime = LocalDateTime.now(),
     val fim: LocalDateTime = LocalDateTime.now(),
     val motivo: String = "",
+    val recorrencia: String = "",
     val active: Boolean = true
 )

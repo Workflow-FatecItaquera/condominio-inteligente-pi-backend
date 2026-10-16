@@ -18,6 +18,7 @@ class ReservaMapper {
             inicio = reservaDto.inicio,
             fim = reservaDto.fim,
             motivo = reservaDto.motivo,
+            recorrencia = reservaDto.recorrencia,
             active = reservaDto.active
         )
     }
@@ -30,6 +31,7 @@ class ReservaMapper {
             inicio = reserva.inicio,
             fim = reserva.fim,
             motivo = reserva.motivo,
+            recorrencia = reserva.recorrencia,
             active = reserva.active
         )
     }

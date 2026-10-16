@@ -13,14 +13,15 @@ interface ReservaRepository : JpaRepository<Reserva, Long> {
     fun findByIdAndActiveTrue(id: Long): Reserva?
 
     @Query(
-        """
-        SELECT r
-        FROM Reserva r
-        WHERE r.active = true
-        AND LOWER(r.nome) LIKE LOWER(CONCAT('%', :nome, '%'))
-        """
+    """
+    SELECT r
+    FROM Reserva r
+    WHERE r.active = true
+    AND LOWER(r.motivo) LIKE LOWER(CONCAT('%', :motivo, '%'))
+    """
     )
-    fun buscarPorNome(
-        @Param("nome") nome: String
+    
+    fun buscarPorMotivo(
+        @Param("motivo") motivo: String
     ): List<Reserva>
 }

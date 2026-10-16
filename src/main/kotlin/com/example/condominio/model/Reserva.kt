@@ -26,6 +26,9 @@ data class Reserva(
     @Column(length = 30, nullable = false)
     val motivo: String = "",
 
+    @Column(length = 30)
+    val recorrencia: String = "",
+
    @Column(nullable = false)
     val active: Boolean = true,
 )
