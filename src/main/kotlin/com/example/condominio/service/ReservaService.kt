@@ -10,11 +10,11 @@ class ReservaService(
 ) {
 
     fun lerTodos(): List<Reserva> {
-        return repository.findAll()
+        return repository.findAllByActiveTrue()
     }
 
     fun lerPorId(id: Long): Reserva? {
-        return repository.findById(id).orElse(null)
+        return repository.findByIdAndActiveTrue(id)
     }
 
     fun cadastrar(reserva: Reserva) {
@@ -22,20 +22,23 @@ class ReservaService(
     }
 
     fun apagar(id: Long): Boolean {
-        return if (repository.existsById(id)) {
-            repository.deleteById(id)
-            true
-        } else {
-            false
-        }
+        val reserva = repository.findByIdAndActiveTrue(id) ?: return false
+
+        repository.save(reserva.copy(active = false))
+        return true
     }
 
     fun atualizar(id: Long, reserva: Reserva): Boolean {
-        return if (repository.existsById(id)) {
-            repository.save(reserva.copy(id = id))
-            true
-        } else {
-            false
-        }
+        val existente = repository.findByIdAndActiveTrue(id)
+            ?: return false
+
+        repository.save(
+            reserva.copy(
+                id = id,
+                active = existente.active
+            )
+        )
+
+        return true
     }
 }

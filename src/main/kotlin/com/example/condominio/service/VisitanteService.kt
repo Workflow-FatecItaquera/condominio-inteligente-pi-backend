@@ -1,3 +1,4 @@
+
 package com.example.condominio.service
 
 import com.example.condominio.model.Visitante
@@ -10,11 +11,11 @@ class VisitanteService(
 ) {
 
     fun lerTodos(): List<Visitante> {
-        return repository.findAll()
+        return repository.findAllByActiveTrue()
     }
 
     fun lerPorId(id: Long): Visitante? {
-        return repository.findById(id).orElse(null)
+        return repository.findByIdAndActiveTrue(id)
     }
 
     fun cadastrar(visitante: Visitante) {
@@ -22,20 +23,23 @@ class VisitanteService(
     }
 
     fun apagar(id: Long): Boolean {
-        return if (repository.existsById(id)) {
-            repository.deleteById(id)
-            true
-        } else {
-            false
-        }
+        val visitante = repository.findByIdAndActiveTrue(id) ?: return false
+
+        repository.save(visitante.copy(active = false))
+        return true
     }
 
     fun atualizar(id: Long, visitante: Visitante): Boolean {
-        return if (repository.existsById(id)) {
-            repository.save(visitante.copy(id = id))
-            true
-        } else {
-            false
-        }
+        val existente = repository.findByIdAndActiveTrue(id)
+            ?: return false
+
+        repository.save(
+            visitante.copy(
+                id = id,
+                active = existente.active
+            )
+        )
+
+        return true
     }
 }

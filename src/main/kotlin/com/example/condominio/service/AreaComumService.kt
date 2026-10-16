@@ -10,11 +10,11 @@ class AreaComumService(
 ) {
 
     fun lerTodos(): List<AreaComum> {
-        return repository.findAll()
+        return repository.findAllByActiveTrue()
     }
 
     fun lerPorId(id: Long): AreaComum? {
-        return repository.findById(id).orElse(null)
+        return repository.findByIdAndActiveTrue(id)
     }
 
     fun cadastrar(areaComum: AreaComum) {
@@ -22,20 +22,23 @@ class AreaComumService(
     }
 
     fun apagar(id: Long): Boolean {
-        return if (repository.existsById(id)) {
-            repository.deleteById(id)
-            true
-        } else {
-            false
-        }
+        val areaComum = repository.findByIdAndActiveTrue(id) ?: return false
+
+        repository.save(areaComum.copy(active = false))
+        return true
     }
 
     fun atualizar(id: Long, areaComum: AreaComum): Boolean {
-        return if (repository.existsById(id)) {
-            repository.save(areaComum.copy(id = id))
-            true
-        } else {
-            false
-        }
+        val existente = repository.findByIdAndActiveTrue(id)
+            ?: return false
+
+        repository.save(
+            areaComum.copy(
+                id = id,
+                active = existente.active
+            )
+        )
+
+        return true
     }
 }
