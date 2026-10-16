@@ -21,6 +21,9 @@ data class Apartamento(
     @Column(nullable = false, length = 10)
     val andar: String = "",
 
+    @Column(nullable = false, length = 10)
+    val interfone: String = "",
+
     @Column(nullable = false)
     val active: Boolean = true
 )

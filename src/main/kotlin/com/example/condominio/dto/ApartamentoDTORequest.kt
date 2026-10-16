@@ -20,5 +20,8 @@ data class ApartamentoDTORequest(
     @Size(max = 10)
     val andar: String = "",
 
+    @Size(max = 10)
+    val interfone: String = "",
+
     val active: Boolean = true
 )

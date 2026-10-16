@@ -6,5 +6,6 @@ data class ApartamentoDTOResponse(
     val bloco: String = "",
     val numero: Int = 0,
     val andar: String = "",
+    val interfone: String = "",
     val active: Boolean = true
 )

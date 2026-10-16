@@ -16,6 +16,7 @@ class ApartamentoMapper {
             bloco = apartamentoDto.bloco,
             numero = apartamentoDto.numero,
             andar = apartamentoDto.andar,
+            interfone = apartamentoDto.interfone,
             active = apartamentoDto.active
         )
     }
@@ -27,6 +28,7 @@ class ApartamentoMapper {
             bloco = apartamento.bloco,
             numero = apartamento.numero,
             andar = apartamento.andar,
+            interfone = apartamento.interfone,
             active = apartamento.active
         )
     }

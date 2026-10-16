@@ -3,7 +3,6 @@ package com.example.condominio.dto
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
-import java.time.LocalDateTime
 
 data class UsuarioDTORequest(
     @NotBlank(message = "O campo nome precisa ser preenchido")
@@ -17,9 +16,5 @@ data class UsuarioDTORequest(
     val telefone: String? = null,
 
     @Size(max = 255)
-    val foto: String? = null,
-
-    val active: Boolean = true,
-
-    val dataRegistro: LocalDateTime = LocalDateTime.now(),
+    val foto: String? = null
 )

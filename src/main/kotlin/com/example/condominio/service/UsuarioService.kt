@@ -59,11 +59,8 @@ class UsuarioService(
     }
 
     fun apagar(id: Long): Boolean {
-        return if (repository.existsById(id)) {
-            repository.deleteById(id)
-            true
-        } else {
-            false
-        }
+        val usuario = repository.findByIdAndActiveTrue(id) ?: return false
+        repository.save(usuario.copy(active = false))
+        return true
     }
 }

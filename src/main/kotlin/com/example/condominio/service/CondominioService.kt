@@ -26,12 +26,9 @@ class CondominioService(
     }
 
     fun apagar(id: Long): Boolean {
-        return if (repository.existsById(id)) {
-            repository.deleteById(id)
-            true
-        } else {
-            false
-        }
+        val condominio = repository.findByIdAndActiveTrue(id) ?: return false
+        repository.save(condominio.copy(active = false))
+        return true
     }
 
     fun atualizar(id: Long, condominio: Condominio): Boolean {

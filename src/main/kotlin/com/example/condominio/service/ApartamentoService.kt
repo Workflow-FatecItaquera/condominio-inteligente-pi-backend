@@ -27,12 +27,9 @@ class ApartamentoService(
     }
 
     fun apagar(id: Long): Boolean {
-        return if (repository.existsById(id)) {
-            repository.deleteById(id)
-            true
-        } else {
-            false
-        }
+        val apartamento = repository.findByIdAndActiveTrue(id) ?: return false
+        repository.save(apartamento.copy(active = false))
+        return true
     }
 
     fun atualizar(id: Long, apartamento: Apartamento): Boolean {
