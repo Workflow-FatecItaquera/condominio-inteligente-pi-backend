@@ -14,9 +14,7 @@ class UsuarioMapper {
             nome = usuarioDto.nome,
             cpf = usuarioDto.cpf,
             telefone = usuarioDto.telefone,
-            foto = usuarioDto.foto,
-            active = usuarioDto.active,
-            dataRegistro = usuarioDto.dataRegistro
+            foto = usuarioDto.foto
         )
     }
 

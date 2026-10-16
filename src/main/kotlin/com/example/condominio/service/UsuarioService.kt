@@ -31,11 +31,11 @@ class UsuarioService(
     }
 
     fun lerTodos(): List<Usuario> {
-        return repository.findAll()
+        return repository.findAllByActiveTrue()
     }
 
     fun lerPorId(id: Long): Usuario? {
-        return repository.findById(id).orElse(null)
+        return repository.findByIdAndActiveTrue(id)
     }
 
     fun atualizar(id: Long, dados: Usuario): Boolean {

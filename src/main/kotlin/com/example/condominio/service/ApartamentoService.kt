@@ -11,11 +11,11 @@ class ApartamentoService(
 ) {
 
     fun lerTodos(): List<Apartamento> {
-        return repository.findAll()
+        return repository.findAllByActiveTrue()
     }
 
     fun lerPorId(id: Long): Apartamento? {
-        return repository.findById(id).orElse(null)
+        return repository.findByIdAndActiveTrue(id)
     }
 
     fun lerPorBloco(bloco: String): List<Apartamento> {

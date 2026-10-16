@@ -10,7 +10,7 @@ class CondominioService(
 ) {
 
     fun lerTodos(): List<Condominio> {
-        return repository.findAll()
+        return repository.findAllByActiveTrue()
     }
 
     fun lerPorId(id: Long): Condominio? {
