@@ -43,15 +43,15 @@ Além disso:
 
 ### Como executar:
 
-1. Abra o CMD na raíz da pasta clonada e execute o comando: 
+1. Renomeie `src\main\resources\properties.example` para `application.properties` e preencha as propriedades com as configurações locais do banco de dados e da aplicação.
+
+> O `application.properties` tem senhas e **não deve ser enviado ao GitHub**. Só o `properties.example` vai para o repositório.
+
+2. Abra o CMD na raiz da pasta clonada e execute o comando:
 
 ```sh
 .\gradlew bootRun
 ```
-
-2. renomeie `src\main\resources\properties.example` para `application.properties` e preencha as variáveis de ambiente.
-
-> O `application.properties` tem senhas e **não deve ser enviado ao GitHub**. Só o `properties.example` vai para o repositório.
 
 <br>
 
