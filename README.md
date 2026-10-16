@@ -207,6 +207,7 @@ A API disponibiliza endpoints REST para gerenciamento dos recursos do condomíni
 
 - `GET /api/{recurso}` — Listagem
 - `GET /api/{recurso}/{id}` — Consulta por ID
+- `GET /api/{recurso}/busca/{parametro}` — Consultas especiais JPQL
 - `POST /api/{recurso}` — Cadastro
 - `PUT /api/{recurso}/{id}` — Atualização
 - `DELETE /api/{recurso}/{id}` — Exclusão

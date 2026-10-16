@@ -17,13 +17,16 @@ class UserDetailImplementation(
         return usuario.email
     }
 
+    override fun isEnabled(): Boolean {
+        return usuario.active
+    }
+
     override fun getAuthorities(): Collection<GrantedAuthority> {
         return usuario.papeis.split(",").map { papel ->
             SimpleGrantedAuthority("ROLE_${papel.trim()}")
         }
     }
 
-    override fun isEnabled(): Boolean { return true }
     override fun isCredentialsNonExpired(): Boolean { return true }
     override fun isAccountNonExpired(): Boolean { return true }
     override fun isAccountNonLocked(): Boolean { return true }

@@ -34,12 +34,28 @@ class AuthController(
                     credenciaisDTO.senha
                 )
             )
+
             val userDetails = authentication.principal as UserDetailImplementation
-            val claims = mapOf("roles" to userDetails.authorities.map { it.authority }, "email" to userDetails.username)
+
+            if (!userDetails.isEnabled) {
+                return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Usuário desativado")
+            }
+
+            val claims = mapOf(
+                "roles" to userDetails.authorities.map { it.authority },
+                "email" to userDetails.username
+            )
+
             val token = jwt.generateToken(userDetails.username, claims)
+
             ResponseEntity.ok(token)
+
         } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas")
+            ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body("Credenciais inválidas")
         }
     }
 

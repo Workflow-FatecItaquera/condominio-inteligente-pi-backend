@@ -43,6 +43,8 @@ class UsuarioController(
         return ResponseEntity.ok(resposta)
     }
 
+    // o Post de usuario é o registro em AuthController.
+
     @PutMapping("/{id}")
     fun atualizar(
         @PathVariable("id") id: Long,

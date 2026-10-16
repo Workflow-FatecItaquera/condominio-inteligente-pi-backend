@@ -25,6 +25,7 @@ data class Usuario(
     val telefone: String? = null,
 
     @Column(nullable = false)
+    //sem legth, campos pre-definidos
     val papeis: String = "MORADOR",
 
     @Column(length = 255)
