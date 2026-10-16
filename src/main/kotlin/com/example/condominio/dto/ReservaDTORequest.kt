@@ -24,9 +24,9 @@ data class ReservaDTORequest(
     @Size(max = 30, message = "O campo motivo deve ter no máximo 30 caracteres")
     val motivo: String = "",
 
+    val active: Boolean = true,
+    
     @Size(max = 30, message = "O campo recorrência precisa ser informado")
     val recorrencia: String = "",
 
-    @Size(max = 255)
-    val active: Boolean = true,
 )

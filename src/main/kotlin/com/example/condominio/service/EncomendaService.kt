@@ -37,4 +37,8 @@ class EncomendaService(
         )
         return true
     }
+
+    fun buscaPorCodigo(codigo: String): List<Encomenda> {
+        return repository.buscarPorCodigo(codigo.trim())
+    }
 }

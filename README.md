@@ -1,7 +1,8 @@
 # Projeto Integrador Final: Condomínio Inteligente
 
 **Grupo:** Workflow<br>
-**Repositório:** [condominio-inteligente-pi-backend](https://github.com/Workflow-FatecItaquera/condominio-inteligente-pi-backend)
+**Repositório (Front):** [condominio-inteligente-pi-frontend](https://github.com/Workflow-FatecItaquera/condominio-inteligente-pi-frontend) <br>
+**Repositório (Back):** [condominio-inteligente-pi-frontend](https://github.com/Workflow-FatecItaquera/condominio-inteligente-pi-frontend)
 
 **API REST** para gestão de condomínios, usuários, apartamentos, visitantes, reservas de áreas comuns, encomendas, ocorrências, cobranças, pagamentos e despesas. A aplicação centraliza informações administrativas e financeiras do condomínio, facilitando o acesso dos moradores e o trabalho da equipe responsável pela gestão.
 

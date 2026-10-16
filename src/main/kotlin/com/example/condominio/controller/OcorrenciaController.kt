@@ -27,6 +27,14 @@ class OcorrenciaController(
         return ResponseEntity.ok(mapper.toResponse(ocorrencia))
     }
 
+    @GetMapping("/busca")
+    fun buscaPorCategoria(
+        @RequestParam("categoria") categoria: String
+    ): List<OcorrenciaDTOResponse> {
+        return service.buscaPorCategoria(categoria)
+            .map { mapper.toResponse(it) }
+    }
+
     @PostMapping
     fun cadastrar(@Valid @RequestBody ocorrenciaDto: OcorrenciaDTORequest): ResponseEntity<String> {
         return try {
