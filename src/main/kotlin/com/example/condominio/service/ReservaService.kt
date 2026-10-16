@@ -11,11 +11,9 @@ class ReservaService(
 
     fun lerTodos(): List<Reserva> {
         return repository.findAllByActiveTrue()
-        return repository.findAllByActiveTrue()
     }
 
     fun lerPorId(id: Long): Reserva? {
-        return repository.findByIdAndActiveTrue(id)
         return repository.findByIdAndActiveTrue(id)
     }
 
@@ -24,10 +22,6 @@ class ReservaService(
     }
 
     fun apagar(id: Long): Boolean {
-        val reserva = repository.findByIdAndActiveTrue(id) ?: return false
-
-        repository.save(reserva.copy(active = false))
-        return true
         val reserva = repository.findByIdAndActiveTrue(id) ?: return false
 
         repository.save(reserva.copy(active = false))

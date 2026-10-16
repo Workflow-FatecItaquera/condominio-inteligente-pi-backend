@@ -28,11 +28,21 @@ class EncomendaController(
     }
 
     @GetMapping("/busca/{codigo}")
-    fun buscaPorCodigo(
-        @RequestParam("codigo") codigo: String
-    ): List<EncomendaDTOResponse> {
-        return service.buscaPorCodigo(codigo)
-            .map { mapper.toResponse(it) }
+    fun buscarPorCodigo(
+        @PathVariable("codigo") codigo: String
+    ): ResponseEntity<List<EncomendaDTOResponse>> {
+
+        val resultado = service.buscaPorCodigo(codigo)
+
+        if (resultado.isEmpty()) {
+            return ResponseEntity.notFound().build()
+        }
+
+        val resposta = resultado.map {
+            mapper.toResponse(it)
+        }
+
+        return ResponseEntity.ok(resposta)
     }
 
     @PostMapping

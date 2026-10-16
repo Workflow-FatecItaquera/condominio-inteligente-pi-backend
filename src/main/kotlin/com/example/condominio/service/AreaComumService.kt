@@ -11,11 +11,9 @@ class AreaComumService(
 
     fun lerTodos(): List<AreaComum> {
         return repository.findAllByActiveTrue()
-        return repository.findAllByActiveTrue()
     }
 
     fun lerPorId(id: Long): AreaComum? {
-        return repository.findByIdAndActiveTrue(id)
         return repository.findByIdAndActiveTrue(id)
     }
 
@@ -24,10 +22,6 @@ class AreaComumService(
     }
 
     fun apagar(id: Long): Boolean {
-        val areaComum = repository.findByIdAndActiveTrue(id) ?: return false
-
-        repository.save(areaComum.copy(active = false))
-        return true
         val areaComum = repository.findByIdAndActiveTrue(id) ?: return false
 
         repository.save(areaComum.copy(active = false))
@@ -49,6 +43,6 @@ class AreaComumService(
     }
 
     fun buscarPorNome(nome: String): List<AreaComum> {
-    return repository.buscarPorNome(nome)
+        return repository.buscarPorNome(nome)
     }
 }

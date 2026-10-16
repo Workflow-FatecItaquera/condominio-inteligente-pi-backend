@@ -68,9 +68,19 @@ class VisitanteController(
 
     @GetMapping("/busca/{nome}")
     fun buscarPorNome(
-        @RequestParam("nome") nome: String
-    ): List<VisitanteDTOResponse> {
-        return service.buscarPorNome(nome)
-            .map { mapper.toResponse(it) }
+        @PathVariable("nome") nome: String
+    ): ResponseEntity<List<VisitanteDTOResponse>> {
+
+        val resultado = service.buscarPorNome(nome)
+
+        if (resultado.isEmpty()) {
+            return ResponseEntity.notFound().build()
+        }
+
+        val resposta = resultado.map {
+            mapper.toResponse(it)
+        }
+
+        return ResponseEntity.ok(resposta)
     }
 }

@@ -29,10 +29,20 @@ class OcorrenciaController(
 
     @GetMapping("/busca/{categoria}")
     fun buscaPorCategoria(
-        @RequestParam("categoria") categoria: String
-    ): List<OcorrenciaDTOResponse> {
-        return service.buscaPorCategoria(categoria)
-            .map { mapper.toResponse(it) }
+        @PathVariable("categoria") categoria: String
+    ): ResponseEntity<List<OcorrenciaDTOResponse>> {
+
+        val resultado = service.buscaPorCategoria(categoria)
+
+        if (resultado.isEmpty()) {
+            return ResponseEntity.notFound().build()
+        }
+
+        val resposta = resultado.map {
+            mapper.toResponse(it)
+        }
+
+        return ResponseEntity.ok(resposta)
     }
 
     @PostMapping

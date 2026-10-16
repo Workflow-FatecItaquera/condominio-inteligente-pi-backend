@@ -66,11 +66,21 @@ class PagamentoRegistradoController(
         }
     }
 
-    @GetMapping("/busca")
+    @GetMapping("/busca/{formaPagamento}")
     fun buscarPorFormaPagamento(
-        @RequestParam formaPagamento: String
-    ): List<PagamentoRegistradoDTOResponse> {
-        return service.buscarPorFormaPagamento(formaPagamento)
-            .map { mapper.toResponse(it) }
+        @PathVariable("formaPagamento") formaPagamento: String
+    ): ResponseEntity<List<PagamentoRegistradoDTOResponse>> {
+
+        val resultado = service.buscarPorFormaPagamento(formaPagamento)
+
+        if (resultado.isEmpty()) {
+            return ResponseEntity.notFound().build()
+        }
+
+        val resposta = resultado.map {
+            mapper.toResponse(it)
+        }
+
+        return ResponseEntity.ok(resposta)
     }
 }

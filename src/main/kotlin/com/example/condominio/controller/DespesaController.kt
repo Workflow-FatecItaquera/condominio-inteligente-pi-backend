@@ -66,11 +66,21 @@ class DespesaController(
         }
     }
 
-    @GetMapping("/busca")
+    @GetMapping("/busca/{categoria}")
     fun buscarPorCategoria(
-        @RequestParam categoria: String
-    ): List<DespesaDTOResponse> {
-        return service.buscarPorCategoria(categoria)
-            .map { mapper.toResponse(it) }
+        @PathVariable("categoria") categoria: String
+    ): ResponseEntity<List<DespesaDTOResponse>> {
+
+        val resultado = service.buscarPorCategoria(categoria)
+
+        if (resultado.isEmpty()) {
+            return ResponseEntity.notFound().build()
+        }
+
+        val resposta = resultado.map {
+            mapper.toResponse(it)
+        }
+
+        return ResponseEntity.ok(resposta)
     }
 }

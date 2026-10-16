@@ -66,11 +66,21 @@ class CobrancaCondominialController(
         }
     }
 
-    @GetMapping("/busca")
+    @GetMapping("/busca/{descricao}")
     fun buscarPorDescricao(
-        @RequestParam descricao: String
-    ): List<CobrancaCondominialDTOResponse> {
-        return service.buscarPorDescricao(descricao)
-            .map { mapper.toResponse(it) }
+        @PathVariable("descricao") descricao: String
+    ): ResponseEntity<List<CobrancaCondominialDTOResponse>> {
+
+        val resultado = service.buscarPorDescricao(descricao)
+
+        if (resultado.isEmpty()) {
+            return ResponseEntity.notFound().build()
+        }
+
+        val resposta = resultado.map {
+            mapper.toResponse(it)
+        }
+
+        return ResponseEntity.ok(resposta)
     }
 }

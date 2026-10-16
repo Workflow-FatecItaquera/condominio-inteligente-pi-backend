@@ -66,12 +66,21 @@ class ReservaController(
         }
     }
 
-
     @GetMapping("/busca/{motivo}")
     fun buscarPorMotivo(
-        @RequestParam("motivo") motivo: String
-    ): List<ReservaDTOResponse> {
-        return service.buscarPorMotivo(motivo)
-            .map { mapper.toResponse(it) }
+        @PathVariable("motivo") motivo: String
+    ): ResponseEntity<List<ReservaDTOResponse>> {
+
+        val resultado = service.buscarPorMotivo(motivo)
+
+        if (resultado.isEmpty()) {
+            return ResponseEntity.notFound().build()
+        }
+
+        val resposta = resultado.map {
+            mapper.toResponse(it)
+        }
+
+        return ResponseEntity.ok(resposta)
     }
 }

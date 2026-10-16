@@ -68,9 +68,19 @@ class AreaComumController(
 
     @GetMapping("/busca/{nome}")
     fun buscarPorNome(
-        @RequestParam("nome") nome: String
-    ): List<AreaComumDTOResponse> {
-        return service.buscarPorNome(nome)
-            .map { mapper.toResponse(it) }
+        @PathVariable("nome") nome: String
+    ): ResponseEntity<List<AreaComumDTOResponse>> {
+
+        val resultado = service.buscarPorNome(nome)
+
+        if (resultado.isEmpty()) {
+            return ResponseEntity.notFound().build()
+        }
+
+        val resposta = resultado.map {
+            mapper.toResponse(it)
+        }
+
+        return ResponseEntity.ok(resposta)
     }
 }
