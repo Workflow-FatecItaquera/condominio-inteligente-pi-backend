@@ -1,6 +1,9 @@
 # Projeto Integrador Final: Condomínio Inteligente
 
-**API REST** para gestão de condomínios: usuários, apartamentos, visitantes, reservas de áreas comuns, encomendas, ocorrências, funcionários, cobranças, pagamentos, despesas e dispositivos IoT.
+**Grupo:** Workflow<br>
+**Repositório:** [condominio-inteligente-pi-backend](https://github.com/Workflow-FatecItaquera/condominio-inteligente-pi-backend)
+
+**API REST** para gestão de condomínios, usuários, apartamentos, visitantes, reservas de áreas comuns, encomendas, ocorrências, cobranças, pagamentos e despesas. A aplicação centraliza informações administrativas e financeiras do condomínio, facilitando o acesso dos moradores e o trabalho da equipe responsável pela gestão.
 
 <br>
 
@@ -23,7 +26,29 @@
 
 <br>
 
-## Como Contribuir?
+## Arquitetura do projeto
+
+### Backend
+
+O backend utiliza uma arquitetura em camadas, organizada dentro de `src/main/kotlin/com/example/condominio`:
+
+- **`model`** — entidades persistidas no banco de dados por meio do JPA.
+- **`repository`** — interfaces de acesso aos dados utilizando Spring Data JPA.
+- **`service`** — regras de negócio e operações de CRUD.
+- **`dto`** — objetos utilizados na entrada e na saída de dados da API.
+- **`mapper`** — conversão entre entidades e DTOs.
+- **`controller`** — endpoints REST e tratamento das requisições HTTP.
+- **`security`** — autenticação, geração e validação de JWT e regras de autorização.
+- **`src/main/resources`** — configurações da aplicação e do banco de dados.
+- **`src/test`** — testes automatizados e configurações exclusivas do ambiente de teste.
+
+### Frontend
+
+O frontend é desenvolvido em um repositório separado, utilizando Kotlin Multiplatform e Compose Multiplatform para Android, Desktop e Web. A criação inicial do repositório ficou sob responsabilidade de Lucas Retanero.
+
+<br>
+
+## Instalação e execução
 
 ### Pré-requisitos:
 - Ter uma cópia do repositório https://github.com/Workflow-FatecItaquera/condominio-inteligente-pi-backend.git
@@ -43,17 +68,27 @@ Além disso:
 
 ### Como executar:
 
-1. Abra o CMD na raíz da pasta clonada e execute o comando: 
-
-```sh
-.\gradlew bootRun
-```
-
-2. renomeie `src\main\resources\properties.example` para `application.properties` e preencha as variáveis de ambiente.
+1. Renomeie `src\main\resources\properties.example` para `application.properties` e preencha as propriedades com as configurações locais do banco de dados e da aplicação.
 
 > O `application.properties` tem senhas e **não deve ser enviado ao GitHub**. Só o `properties.example` vai para o repositório.
 
+2. Abra o CMD na raiz da pasta clonada e execute o comando:
+
+```sh
+.\gradlew.bat bootRun
+```
+
+3. Após a inicialização, a API poderá ser acessada em `http://localhost:8080`.
+
+Para executar os testes automatizados, utilize:
+
+```sh
+.\gradlew.bat test
+```
+
 <br>
+
+## Como contribuir
 
 ### Como desenvolver:
 
@@ -101,9 +136,9 @@ Todas as rotas `/api/...` exigem um token JWT. Apenas as rotas `/auth/**` são a
 
 1. **Login com o admin inicial** 
 
-Use o e-mail e a senha que você inseriu no `application.properties`:
+Use o e-mail e a senha do administrador inicial configurado na aplicação:
 
-- `POST http://localhost:8080/auth/login`
+- `POST http://localhost:8080/auth/signin`
 
 ```json
 {
@@ -126,7 +161,7 @@ Em cada requisição, abra **Authorization** > **Bearer Token** e cole o token.<
 
 (sempre registrado como *MORADOR*):
 
-- `POST http://localhost:8080/auth/register`
+- `POST http://localhost:8080/auth/signup`
 
 ```json
 {
@@ -156,9 +191,9 @@ Em cada requisição, abra **Authorization** > **Bearer Token** e cole o token.<
 
 > Tipos de usuário <br><br>
 **`MORADOR`** | Reserva áreas comuns, cadastra visitantes, abre ocorrências e consulta cobranças.<br><br>
-**`PORTARIA`** | Registra encomendas e visitantes, acompanha ocorrências e dispositivos IoT.
+**`PORTARIA`** | Registra encomendas e visitantes e acompanha ocorrências.
 <br><br>
-**`SÍNDICO`** | Gerencia áreas comuns, funcionários, reservas, ocorrências e finanças.
+**`SÍNDICO`** | Gerencia áreas comuns, reservas, ocorrências e finanças.
 <br><br>
 **`ADMIN`** | Acesso total ao gerenciamento de condomínios, usuários e permissões.
 
@@ -186,21 +221,31 @@ A API disponibiliza endpoints REST para gerenciamento dos recursos do condomíni
 - `/api/visitantes`
 - `/api/encomendas`
 - `/api/ocorrencias`
-- `/api/funcionarios`
 
 **Gestão financeira**
 - `/api/cobrancas`
 - `/api/pagamentos`
 - `/api/despesas`
 
-**Dispositivos IoT**
-- `/api/dispositivos`
-
 **Autorização**
-- `/auth/login`
-- `/auth/register`
+- `/auth/signin`
+- `/auth/signup`
 
 > Alguns recursos possuem dependências por chave estrangeira. Recomenda-se cadastrar primeiro o condomínio, seguido dos apartamentos e áreas comuns. Depois, podem ser cadastradas reservas, encomendas e cobranças e, por último, os pagamentos.
+
+<br>
+
+## Preparação para a entrega
+
+Antes de compactar o backend, execute:
+
+```sh
+.\gradlew.bat clean
+```
+
+Depois, confirme que a pasta `build` foi removida e que ela não está presente no arquivo `.zip`. O arquivo do backend deve ser nomeado como `Condominio-Inteligente-backend.zip`.
+
+No projeto frontend, também é necessário executar o `gradlew clean` e remover tanto a pasta `build` da raiz quanto a pasta `shared/build` antes de criar o arquivo `Condominio-Inteligente-frontend.zip`.
 
 <br>
 
@@ -219,9 +264,9 @@ existência do `application.properties` e se possui as chaves `app.jwt.*`
 
 ## Equipe de desenvolvimento
 
-Projeto desenvolvido por:
+Projeto desenvolvido pelo grupo **Workflow**:
 
-- **Pedro Fink** — [@finkDev](https://github.com/finkDev)
-- **Trinitydevs** — [@trinitydevs](https://github.com/trinitydevs)
-- **Kevyn Cavalcanti** — [@Kevyn-Cavalcanti](https://github.com/Kevyn-Cavalcanti)
-- **Lucas Retanero** — [@Lucas-Retanero](https://github.com/Lucas-Retanero)
+- **Kevyn Cavalcanti** — [@Kevyn-Cavalcanti](https://github.com/Kevyn-Cavalcanti) — Usuário, Condomínio e Apartamento.
+- **Trinitydevs** — [@trinitydevs](https://github.com/trinitydevs) — Visitante, Reserva e Área Comum.
+- **Pedro Fink** — [@finkDev](https://github.com/finkDev) — Pagamento Registrado, Cobrança Condominial e Despesa.
+- **Lucas Retanero** — [@Lucas-Retanero](https://github.com/Lucas-Retanero) — Ocorrência, Encomenda e criação inicial do repositório frontend.
