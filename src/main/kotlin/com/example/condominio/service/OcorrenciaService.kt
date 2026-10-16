@@ -38,4 +38,8 @@ class OcorrenciaService(
         )
         return true
     }
+
+    fun buscaPorCategoria(categoria: String): List<Ocorrencia> {
+        return repository.buscarPorCategoria(categoria.trim())
+    }
 }

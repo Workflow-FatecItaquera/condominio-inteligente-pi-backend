@@ -27,6 +27,14 @@ class EncomendaController(
         return ResponseEntity.ok(mapper.toResponse(encomenda))
     }
 
+    @GetMapping("/busca")
+    fun buscaPorCodigo(
+        @RequestParam("codigo") codigo: String
+    ): List<EncomendaDTOResponse> {
+        return service.buscaPorCodigo(codigo)
+            .map { mapper.toResponse(it) }
+    }
+
     @PostMapping
     fun cadastrar(@Valid @RequestBody encomendaDto: EncomendaDTORequest): ResponseEntity<String> {
         return try {
