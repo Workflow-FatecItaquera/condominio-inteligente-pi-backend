@@ -7,15 +7,19 @@ Content-Type: application/json
 
 { "email": "admin@condominio.com", "senha": "admin123" }
 
-### 2. Define o relógio de teste (dia útil, 10:00)
+### 2. Define o relógio de teste (dia D da planilha, 11/11/2026), parado nesse instante
 PUT {{host}}/admin/teste/relogio
 Authorization: Bearer {{admin}}
 Content-Type: application/json
 
-{ "dataHora": "2026-12-01T10:00:00" }
+{ "dataHora": "2026-11-11T10:00:00", "congelar": "true" }
 
-### 3. Restaura a massa-base B0 (anote os ids devolvidos)
+### 3. Restaura a massa-base B0 (anote os ids devolvidos; o id da A01 muda a cada restauração)
 POST {{host}}/admin/teste/massa-b0
+Authorization: Bearer {{admin}}
+
+### 3b. B0 com a lista revisada em outra data (CT04 e CT18)
+POST {{host}}/admin/teste/massa-b0?revisaoLista=2026-05-10
 Authorization: Bearer {{admin}}
 
 ### 4. Login da portaria P01 (copie o token para @portaria)
@@ -73,3 +77,15 @@ Authorization: Bearer {{admin}}
 Content-Type: application/json
 
 { "data": "2026-12-25", "nome": "Natal" }
+
+### 13. Liga uma falha induzida (CONSULTA, GRAVAR_ENTRADA ou GRAVAR_SAIDA)
+PUT {{host}}/admin/teste/falhas/GRAVAR_ENTRADA
+Authorization: Bearer {{admin}}
+
+### 14. Desliga todas as falhas induzidas
+DELETE {{host}}/admin/teste/falhas
+Authorization: Bearer {{admin}}
+
+### 15. Inativa o visitante V01 (CT22)
+DELETE {{host}}/api/visitantes/1
+Authorization: Bearer {{admin}}

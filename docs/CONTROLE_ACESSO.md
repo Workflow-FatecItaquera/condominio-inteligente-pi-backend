@@ -25,10 +25,21 @@ que `app.admin.*` esteja configurado).
 
 | Rota | Função |
 |------|--------|
-| `POST /admin/teste/massa-b0` | Restaura a massa-base B0 relativa ao dia D do relógio e devolve os ids |
-| `PUT /admin/teste/relogio` | Corpo `{"dataHora":"2026-12-01T10:00:00"}`; o tempo segue correndo a partir daí |
+| `POST /admin/teste/massa-b0` | Restaura a massa-base B0 relativa ao dia D do relógio e devolve os ids. Parâmetro opcional `?revisaoLista=2026-05-10` define a data de revisão das listas (CT04 e CT18) |
+| `PUT /admin/teste/relogio` | Corpo `{"dataHora":"2026-12-01T10:00:00"}`; o tempo segue correndo a partir daí. Com `"congelar":"true"` o relógio fica parado nesse instante (limites exatos de horário) |
 | `DELETE /admin/teste/relogio` | Volta ao relógio real |
 | `GET /admin/teste/relogio` | Lê o relógio |
+| `PUT /admin/teste/falhas/{ponto}` | Liga uma falha induzida: `CONSULTA` (CT17), `GRAVAR_ENTRADA` (CT15) ou `GRAVAR_SAIDA` (CT16) |
+| `DELETE /admin/teste/falhas` | Desliga todas as falhas induzidas (a massa B0 não faz isso) |
+| `GET /admin/teste/falhas` | Lista as falhas ligadas |
+
+### Massa-base B0 (D = dia do relógio; na planilha D = 11/11/2026)
+
+- Unidades U101 e U102; visitantes V01 (`DOC-V01`) e V02 (`DOC-V02`), ativos.
+- Listas de U101 e U102 com V01 e V02, revisadas em D menos 6 meses (11/05/2026), válidas até D inclusive.
+- Autorização A01: V01 e U101, de D a D+19 (11/11 a 30/11/2026), 08:00:00 a 18:00:00, sem fim de semana e sem feriado.
+- Sem registros de acesso e sem feriados. Restaure a B0 com o relógio já em D (ajuste o relógio antes de chamar `massa-b0`).
+- O passo a passo de cada caso de teste da planilha está em `docs/ROTEIRO_TESTES_SISTEMA.md`.
 
 Usuários de teste criados pela massa B0 (senha `Teste@123`): `portaria.p01@teste.local` (PORTARIA) e
 `responsavel.r01@teste.local` (MORADOR).
