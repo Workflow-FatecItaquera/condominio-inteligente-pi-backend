@@ -1,0 +1,310 @@
+@startuml
+skinparam classAttributeIconSize 0
+left to right direction
+package model {
+  class Visitante {
+    id: Long?
+    nome: String
+    visitaAutorizada: Boolean
+    ultimaVisita: LocalDateTime?
+    documento: String
+    telefone: String?
+    email: String?
+    foto: String?
+    active: Boolean
+    dataRegistro: LocalDateTime
+  }
+  class Apartamento {
+    id: Long?
+    condominio: Condominio
+    bloco: String
+    numero: Int
+    andar: String
+    interfone: String
+    active: Boolean
+  }
+  class Usuario {
+    id: Long?
+    nome: String
+    cpf: String
+    email: String
+    papeis: String
+    active: Boolean
+  }
+  class AutorizacaoAcesso {
+    id: Long?
+    visitante: Visitante
+    unidade: Apartamento
+    responsavel: Usuario?
+    dataInicio: LocalDate
+    dataFim: LocalDate
+    horaInicio: LocalTime
+    horaFim: LocalTime
+    permiteFimSemana: Boolean
+    permiteFeriado: Boolean
+    canceladaEm: LocalDateTime?
+    estaCancelada(): Boolean
+    estadoEm(agora: LocalDateTime): EstadoAutorizacao
+    cobreData(data: LocalDate): Boolean
+    dentroDoHorario(hora: LocalTime): Boolean
+    cancelar(agora: LocalDateTime): AutorizacaoAcesso
+  }
+  class ListaAutorizados {
+    id: Long?
+    unidade: Apartamento
+    responsavel: Usuario?
+    atualizadaEm: LocalDate
+    visitantes: MutableSet<Visitante>
+    active: Boolean
+    validaAte(): LocalDate
+    vigenteEm(data: LocalDate): Boolean
+    contem(visitanteId: Long?): Boolean
+  }
+  class RegistroAcesso {
+    id: Long?
+    autorizacao: AutorizacaoAcesso
+    unidadeId: Long
+    porteiroId: Long
+    entradaEm: LocalDateTime
+    saidaEm: LocalDateTime?
+    porteiroSaidaId: Long?
+    visitaAberta(): Boolean
+    registrarSaida(agora: LocalDateTime, porteiroId: Long): RegistroAcesso
+  }
+  class Feriado {
+    id: Long?
+    data: LocalDate
+    nome: String
+  }
+  enum EstadoAutorizacao {
+    AGENDADA
+    VIGENTE
+    EXPIRADA
+    CANCELADA
+  }
+}
+package repository {
+  interface VisitanteRepository {
+    findAllByActiveTrue(): List<Visitante>
+    findByIdAndActiveTrue(id: Long): Visitante?
+    findFirstByDocumento(documento: String): Visitante?
+    buscarPorNome(nome: String): List<Visitante>
+  }
+  interface ListaAutorizadosRepository {
+    findFirstByUnidadeIdAndActiveTrueOrderByAtualizadaEmDescIdDesc(unidadeId: Long): ListaAutorizados?
+  }
+  interface AutorizacaoAcessoRepository {
+    findAllByVisitanteIdAndUnidadeId(visitanteId: Long, unidadeId: Long): List<AutorizacaoAcesso>
+    findAllByVisitanteId(visitanteId: Long): List<AutorizacaoAcesso>
+    findAllByUnidadeId(unidadeId: Long): List<AutorizacaoAcesso>
+  }
+  interface ApartamentoRepository {
+    findAllByActiveTrue(): List<Apartamento>
+    findByIdAndActiveTrue(id: Long): Apartamento?
+  }
+  interface UsuarioRepository {
+    findByIdAndActiveTrue(id: Long): Usuario?
+  }
+  interface FeriadoRepository {
+    existsByData(data: LocalDate): Boolean
+  }
+  interface RegistroAcessoRepository {
+    findAllBySaidaEmIsNull(): List<RegistroAcesso>
+    findAllByUnidadeId(unidadeId: Long): List<RegistroAcesso>
+  }
+}
+package service {
+  class ControleAcessoService {
+    visitanteRepository: VisitanteRepository
+    listaRepository: ListaAutorizadosRepository
+    autorizacaoRepository: AutorizacaoAcessoRepository
+    registroRepository: RegistroAcessoRepository
+    calendario: CalendarioFeriados
+    falhas: InjetorFalhas
+    avaliarEntrada(visitanteId: Long?,
+        unidadeId: Long,
+        documento: String,
+        agora: LocalDateTime): DecisaoAcesso
+    registrarEntrada(autorizacaoId: Long,
+        porteiroId: Long,
+        documento: String,
+        agora: LocalDateTime): ResultadoEntrada
+    registrarSaida(registroId: Long, porteiroId: Long, agora: LocalDateTime): ResultadoSaida
+    lerRegistros(): List<RegistroAcesso>
+    lerAbertos(): List<RegistroAcesso>
+    lerRegistro(id: Long): RegistroAcesso?
+  }
+  class AutorizacaoService {
+    autorizacaoRepository: AutorizacaoAcessoRepository
+    listaRepository: ListaAutorizadosRepository
+    visitanteRepository: VisitanteRepository
+    apartamentoRepository: ApartamentoRepository
+    usuarioRepository: UsuarioRepository
+    conceder(visitanteId: Long,
+        unidadeId: Long,
+        responsavelId: Long?,
+        dataInicio: LocalDate,
+        dataFim: LocalDate,
+        horaInicio: LocalTime,
+        horaFim: LocalTime,
+        permiteFimSemana: Boolean,
+        permiteFeriado: Boolean): AutorizacaoAcesso?
+    cancelar(autorizacaoId: Long, agora: LocalDateTime): Boolean
+    revisarLista(unidadeId: Long,
+        visitanteIds: List<Long>,
+        responsavelId: Long?,
+        atualizadaEm: LocalDate): ListaAutorizados?
+    lerAutorizacao(id: Long): AutorizacaoAcesso?
+    lerAutorizacoes(): List<AutorizacaoAcesso>
+    lerListaVigente(unidadeId: Long): ListaAutorizados?
+  }
+  class VisitanteService {
+    repository: VisitanteRepository
+    lerTodos(): List<Visitante>
+    lerPorId(id: Long): Visitante?
+    cadastrar(visitante: Visitante)
+    apagar(id: Long): Boolean
+    atualizar(id: Long, visitante: Visitante): Boolean
+    buscarPorNome(nome: String): List<Visitante>
+  }
+  interface CalendarioFeriados {
+    ehFeriado(data: LocalDate): Boolean
+  }
+  class CalendarioFeriadosJpa {
+    repository: FeriadoRepository
+    ehFeriado(data: LocalDate): Boolean
+  }
+  interface InjetorFalhas {
+    verificar(ponto: PontoDeFalha)
+  }
+  class InjetorFalhasInativo {
+    verificar(ponto: PontoDeFalha)
+  }
+  enum PontoDeFalha {
+    CONSULTA
+    GRAVAR_ENTRADA
+    GRAVAR_SAIDA
+  }
+  enum MotivoNegacao {
+    CADASTRO_NAO_ENCONTRADO
+    CADASTRO_INATIVO
+    DOCUMENTO_DIVERGENTE
+    FORA_DA_LISTA
+    LISTA_VENCIDA
+    AUTORIZACAO_OUTRA_UNIDADE
+    AUTORIZACAO_OUTRA_PESSOA
+    SEM_AUTORIZACAO
+    AUTORIZACAO_CANCELADA
+    ANTES_DO_PERIODO
+    APOS_O_PERIODO
+    FORA_DO_HORARIO
+    FIM_DE_SEMANA_OU_FERIADO_SEM_PERMISSAO
+    SERVICO_INDISPONIVEL
+    FALHA_AO_GRAVAR
+  }
+  enum StatusSaida {
+    REGISTRADA
+    NAO_ENCONTRADO
+    JA_ENCERRADA
+    FALHA_AO_GRAVAR
+  }
+  class DecisaoAcesso {
+    permitido: Boolean
+    motivo: MotivoNegacao?
+    mensagem: String
+    autorizacao: AutorizacaoAcesso?
+  }
+  class ResultadoEntrada {
+    decisao: DecisaoAcesso
+    registro: RegistroAcesso?
+  }
+  class ResultadoSaida {
+    status: StatusSaida
+    registro: RegistroAcesso?
+  }
+}
+package test {
+  class CondominioApplicationTests {
+  }
+  class RegistroAcessoTest {
+  }
+  class AutorizacaoAcessoTest {
+  }
+  class ListaAutorizadosTest {
+  }
+  class VisitanteTest {
+  }
+  class ControleAcessoServiceTest {
+  }
+  class AutorizacaoServiceTest {
+  }
+  class VisitanteServiceTest {
+  }
+}
+AutorizacaoAcesso --> Apartamento
+AutorizacaoAcesso ..> EstadoAutorizacao
+AutorizacaoAcesso --> Visitante
+ListaAutorizados --> Apartamento
+ListaAutorizados --> Visitante
+RegistroAcesso --> AutorizacaoAcesso
+AutorizacaoAcesso --> Usuario
+ListaAutorizados --> Usuario
+FeriadoRepository --> Feriado
+VisitanteRepository --> Visitante
+ListaAutorizadosRepository --> ListaAutorizados
+AutorizacaoAcessoRepository --> AutorizacaoAcesso
+RegistroAcessoRepository --> RegistroAcesso
+ApartamentoRepository --> Apartamento
+UsuarioRepository --> Usuario
+ControleAcessoService ..> AutorizacaoAcesso
+ControleAcessoService --> AutorizacaoAcessoRepository
+ControleAcessoService --> CalendarioFeriados
+ControleAcessoService ..> DecisaoAcesso
+ControleAcessoService --> InjetorFalhas
+ControleAcessoService --> ListaAutorizadosRepository
+ControleAcessoService ..> RegistroAcesso
+ControleAcessoService --> RegistroAcessoRepository
+ControleAcessoService ..> ResultadoEntrada
+ControleAcessoService ..> ResultadoSaida
+ControleAcessoService ..> Visitante
+ControleAcessoService --> VisitanteRepository
+AutorizacaoService ..> AutorizacaoAcesso
+AutorizacaoService --> AutorizacaoAcessoRepository
+AutorizacaoService ..> ListaAutorizados
+AutorizacaoService --> ListaAutorizadosRepository
+AutorizacaoService --> VisitanteRepository
+AutorizacaoService --> ApartamentoRepository
+AutorizacaoService --> UsuarioRepository
+VisitanteService ..> Visitante
+VisitanteService --> VisitanteRepository
+DecisaoAcesso --> AutorizacaoAcesso
+DecisaoAcesso --> MotivoNegacao
+ResultadoSaida --> StatusSaida
+CalendarioFeriadosJpa ..|> CalendarioFeriados
+CalendarioFeriadosJpa --> FeriadoRepository
+InjetorFalhasInativo ..|> InjetorFalhas
+InjetorFalhas ..> PontoDeFalha
+ControleAcessoService ..> MotivoNegacao
+ResultadoEntrada --> DecisaoAcesso
+ResultadoEntrada --> RegistroAcesso
+ResultadoSaida --> RegistroAcesso
+RegistroAcessoTest ..> RegistroAcesso : testa
+AutorizacaoAcessoTest ..> AutorizacaoAcesso : testa
+ListaAutorizadosTest ..> ListaAutorizados : testa
+VisitanteTest ..> Visitante : testa
+ControleAcessoServiceTest ..> ControleAcessoService : testa
+ControleAcessoServiceTest ..> AutorizacaoAcessoRepository : <<mock>>
+ControleAcessoServiceTest ..> InjetorFalhas : <<mock>>
+ControleAcessoServiceTest ..> ListaAutorizadosRepository : <<mock>>
+ControleAcessoServiceTest ..> RegistroAcessoRepository : <<mock>>
+ControleAcessoServiceTest ..> VisitanteRepository : <<mock>>
+ControleAcessoServiceTest ..> CalendarioFeriados : <<stub>>
+AutorizacaoServiceTest ..> AutorizacaoService : testa
+AutorizacaoServiceTest ..> ApartamentoRepository : <<mock>>
+AutorizacaoServiceTest ..> AutorizacaoAcessoRepository : <<mock>>
+AutorizacaoServiceTest ..> ListaAutorizadosRepository : <<mock>>
+AutorizacaoServiceTest ..> UsuarioRepository : <<mock>>
+AutorizacaoServiceTest ..> VisitanteRepository : <<mock>>
+VisitanteServiceTest ..> VisitanteService : testa
+VisitanteServiceTest ..> VisitanteRepository : <<mock>>
+@enduml
