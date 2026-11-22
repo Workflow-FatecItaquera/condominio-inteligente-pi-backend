@@ -23,14 +23,6 @@ package model {
     interfone: String
     active: Boolean
   }
-  class Usuario {
-    id: Long?
-    nome: String
-    cpf: String
-    email: String
-    papeis: String
-    active: Boolean
-  }
   class AutorizacaoAcesso {
     id: Long?
     visitante: Visitante
@@ -77,10 +69,6 @@ package model {
     nome: String
   }
   enum EstadoAutorizacao {
-    AGENDADA
-    VIGENTE
-    EXPIRADA
-    CANCELADA
   }
 }
 package repository {
@@ -88,7 +76,7 @@ package repository {
     findAllByActiveTrue(): List<Visitante>
     findByIdAndActiveTrue(id: Long): Visitante?
     findFirstByDocumento(documento: String): Visitante?
-    buscarPorNome(nome: String): List<Visitante>
+    buscarPorNome(@Param("nome")
   }
   interface ListaAutorizadosRepository {
     findFirstByUnidadeIdAndActiveTrueOrderByAtualizadaEmDescIdDesc(unidadeId: Long): ListaAutorizados?
@@ -97,16 +85,6 @@ package repository {
     findAllByVisitanteIdAndUnidadeId(visitanteId: Long, unidadeId: Long): List<AutorizacaoAcesso>
     findAllByVisitanteId(visitanteId: Long): List<AutorizacaoAcesso>
     findAllByUnidadeId(unidadeId: Long): List<AutorizacaoAcesso>
-  }
-  interface ApartamentoRepository {
-    findAllByActiveTrue(): List<Apartamento>
-    findByIdAndActiveTrue(id: Long): Apartamento?
-  }
-  interface UsuarioRepository {
-    findByIdAndActiveTrue(id: Long): Usuario?
-  }
-  interface FeriadoRepository {
-    existsByData(data: LocalDate): Boolean
   }
   interface RegistroAcessoRepository {
     findAllBySaidaEmIsNull(): List<RegistroAcesso>
@@ -167,46 +145,27 @@ package service {
     atualizar(id: Long, visitante: Visitante): Boolean
     buscarPorNome(nome: String): List<Visitante>
   }
-  interface CalendarioFeriados {
-    ehFeriado(data: LocalDate): Boolean
+  class MassaTesteService {
+    relogio: RelogioControlavel
+    condominioRepository: CondominioRepository
+    apartamentoRepository: ApartamentoRepository
+    usuarioRepository: UsuarioRepository
+    visitanteRepository: VisitanteRepository
+    listaRepository: ListaAutorizadosRepository
+    autorizacaoRepository: AutorizacaoAcessoRepository
+    registroRepository: RegistroAcessoRepository
+    feriadoRepository: FeriadoRepository
+    passwordEncoder: PasswordEncoder
+    restaurarB0(): Map<String
   }
-  class CalendarioFeriadosJpa {
-    repository: FeriadoRepository
+  interface Relogio {
+    agora(): LocalDateTime
+  }
+  interface CalendarioFeriados {
     ehFeriado(data: LocalDate): Boolean
   }
   interface InjetorFalhas {
     verificar(ponto: PontoDeFalha)
-  }
-  class InjetorFalhasInativo {
-    verificar(ponto: PontoDeFalha)
-  }
-  enum PontoDeFalha {
-    CONSULTA
-    GRAVAR_ENTRADA
-    GRAVAR_SAIDA
-  }
-  enum MotivoNegacao {
-    CADASTRO_NAO_ENCONTRADO
-    CADASTRO_INATIVO
-    DOCUMENTO_DIVERGENTE
-    FORA_DA_LISTA
-    LISTA_VENCIDA
-    AUTORIZACAO_OUTRA_UNIDADE
-    AUTORIZACAO_OUTRA_PESSOA
-    SEM_AUTORIZACAO
-    AUTORIZACAO_CANCELADA
-    ANTES_DO_PERIODO
-    APOS_O_PERIODO
-    FORA_DO_HORARIO
-    FIM_DE_SEMANA_OU_FERIADO_SEM_PERMISSAO
-    SERVICO_INDISPONIVEL
-    FALHA_AO_GRAVAR
-  }
-  enum StatusSaida {
-    REGISTRADA
-    NAO_ENCONTRADO
-    JA_ENCERRADA
-    FALHA_AO_GRAVAR
   }
   class DecisaoAcesso {
     permitido: Boolean
@@ -221,6 +180,51 @@ package service {
   class ResultadoSaida {
     status: StatusSaida
     registro: RegistroAcesso?
+  }
+}
+package controller {
+  class AcessoController {
+    service: ControleAcessoService
+    relogio: Relogio
+    mapper: ControleAcessoMapper
+    avaliar(@Valid @RequestBody dto: AvaliarEntradaDTORequest): ResponseEntity<DecisaoAcessoDTOResponse>
+    registrarEntrada(@Valid @RequestBody dto: RegistrarEntradaDTORequest,
+        authentication: Authentication): ResponseEntity<Any>
+    registrarSaida(@PathVariable("id")
+    lerTodos(): List<RegistroAcessoDTOResponse>
+    lerAbertos(): List<RegistroAcessoDTOResponse>
+    lerPorId(@PathVariable("id")
+  }
+  class AutorizacaoController {
+    service: AutorizacaoService
+    relogio: Relogio
+    mapper: ControleAcessoMapper
+    conceder(@Valid @RequestBody dto: AutorizacaoDTORequest,
+        authentication: Authentication): ResponseEntity<Any>
+    lerTodas(): List<AutorizacaoDTOResponse>
+    lerPorId(@PathVariable("id")
+    cancelar(@PathVariable("id")
+    revisarLista(@PathVariable("unidadeId")
+    lerLista(@PathVariable("unidadeId")
+  }
+  class FeriadoController {
+    repository: FeriadoRepository
+    mapper: ControleAcessoMapper
+    lerTodos(): List<FeriadoDTOResponse>
+    cadastrar(@Valid @RequestBody dto: FeriadoDTORequest): ResponseEntity<Any>
+    apagar(@PathVariable("id")
+  }
+  class TesteController {
+    relogio: RelogioControlavel
+    massa: MassaTesteService
+    falhas: FalhasControlaveis
+    lerRelogio(): Map<String
+    definirRelogio(@RequestBody corpo: Map<String, String>): ResponseEntity<Any>
+    restaurarRelogio(): Map<String
+    restaurarMassa(): Map<String
+    ativarFalha(@PathVariable("ponto")
+    limparFalhas(): Map<String
+    lerFalhas(): Map<String
   }
 }
 package test {
@@ -239,6 +243,7 @@ package test {
   class AutorizacaoServiceTest {
   }
   class VisitanteServiceTest {
+    preparar()
   }
 }
 AutorizacaoAcesso --> Apartamento
@@ -247,15 +252,10 @@ AutorizacaoAcesso --> Visitante
 ListaAutorizados --> Apartamento
 ListaAutorizados --> Visitante
 RegistroAcesso --> AutorizacaoAcesso
-AutorizacaoAcesso --> Usuario
-ListaAutorizados --> Usuario
-FeriadoRepository --> Feriado
 VisitanteRepository --> Visitante
 ListaAutorizadosRepository --> ListaAutorizados
 AutorizacaoAcessoRepository --> AutorizacaoAcesso
 RegistroAcessoRepository --> RegistroAcesso
-ApartamentoRepository --> Apartamento
-UsuarioRepository --> Usuario
 ControleAcessoService ..> AutorizacaoAcesso
 ControleAcessoService --> AutorizacaoAcessoRepository
 ControleAcessoService --> CalendarioFeriados
@@ -273,21 +273,27 @@ AutorizacaoService --> AutorizacaoAcessoRepository
 AutorizacaoService ..> ListaAutorizados
 AutorizacaoService --> ListaAutorizadosRepository
 AutorizacaoService --> VisitanteRepository
-AutorizacaoService --> ApartamentoRepository
-AutorizacaoService --> UsuarioRepository
 VisitanteService ..> Visitante
 VisitanteService --> VisitanteRepository
+MassaTesteService ..> Apartamento
+MassaTesteService ..> AutorizacaoAcesso
+MassaTesteService --> AutorizacaoAcessoRepository
+MassaTesteService ..> ListaAutorizados
+MassaTesteService --> ListaAutorizadosRepository
+MassaTesteService --> RegistroAcessoRepository
+MassaTesteService ..> Visitante
+MassaTesteService --> VisitanteRepository
 DecisaoAcesso --> AutorizacaoAcesso
-DecisaoAcesso --> MotivoNegacao
-ResultadoSaida --> StatusSaida
-CalendarioFeriadosJpa ..|> CalendarioFeriados
-CalendarioFeriadosJpa --> FeriadoRepository
-InjetorFalhasInativo ..|> InjetorFalhas
-InjetorFalhas ..> PontoDeFalha
-ControleAcessoService ..> MotivoNegacao
 ResultadoEntrada --> DecisaoAcesso
 ResultadoEntrada --> RegistroAcesso
 ResultadoSaida --> RegistroAcesso
+AcessoController --> ControleAcessoService
+AcessoController --> Relogio
+AutorizacaoController --> AutorizacaoService
+AutorizacaoController --> Relogio
+AutorizacaoController ..> Visitante
+FeriadoController ..> Feriado
+TesteController --> MassaTesteService
 RegistroAcessoTest ..> RegistroAcesso : testa
 AutorizacaoAcessoTest ..> AutorizacaoAcesso : testa
 ListaAutorizadosTest ..> ListaAutorizados : testa
@@ -306,5 +312,4 @@ AutorizacaoServiceTest ..> ListaAutorizadosRepository : <<mock>>
 AutorizacaoServiceTest ..> UsuarioRepository : <<mock>>
 AutorizacaoServiceTest ..> VisitanteRepository : <<mock>>
 VisitanteServiceTest ..> VisitanteService : testa
-VisitanteServiceTest ..> VisitanteRepository : <<mock>>
 @enduml

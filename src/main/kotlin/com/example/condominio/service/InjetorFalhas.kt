@@ -1,24 +1,53 @@
 package com.example.condominio.service
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
+import java.util.concurrent.ConcurrentHashMap
 
-/** Pontos do fluxo em que uma falha técnica pode ser induzida (caminhos C3, C10 e C11). */
 enum class PontoDeFalha {
     CONSULTA,
     GRAVAR_ENTRADA,
     GRAVAR_SAIDA
 }
 
-/** Permite induzir falhas técnicas para testar os fluxos de exceção. Nos testes de unidade é um mock. */
+/**
+ * Dependência controlável que permite provocar falhas nos testes de sistema
+ * (CT30, CT31 e CT34) sem mexer no banco. Em produção a implementação não faz nada.
+ */
 interface InjetorFalhas {
     fun verificar(ponto: PontoDeFalha)
 }
 
-/** Implementação padrão: nunca induz falha. */
 @Component
-class InjetorFalhasInativo : InjetorFalhas {
+@Profile("!teste")
+class SemFalhas : InjetorFalhas {
+    override fun verificar(ponto: PontoDeFalha) {
+        // produção: nenhuma falha induzida
+    }
+}
+
+/** Ativo somente no perfil "teste"; as falhas são ligadas e desligadas por /admin/teste/falhas. */
+@Component
+@Profile("teste")
+class FalhasControlaveis : InjetorFalhas {
+
+    private val ativas: MutableSet<PontoDeFalha> = ConcurrentHashMap.newKeySet()
 
     override fun verificar(ponto: PontoDeFalha) {
-        // nenhuma falha induzida
+        if (ativas.contains(ponto)) {
+            throw IllegalStateException("Falha induzida pelo ambiente de teste em $ponto")
+        }
+    }
+
+    fun ativar(ponto: PontoDeFalha) {
+        ativas.add(ponto)
+    }
+
+    fun limpar() {
+        ativas.clear()
+    }
+
+    fun ativas(): Set<PontoDeFalha> {
+        return ativas.toSet()
     }
 }

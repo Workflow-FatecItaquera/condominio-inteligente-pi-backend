@@ -38,7 +38,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testImplementation("org.mockito.kotlin:mockito-kotlin:6.0.0")
-    testRuntimeOnly("com.h2database:h2")
+    runtimeOnly("com.h2database:h2") // banco em memória dos testes e do perfil "teste"
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

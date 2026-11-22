@@ -70,6 +70,15 @@ class SecurityConfiguration(
                 authorize(HttpMethod.GET, "/api/apartamentos/**", authenticated)
                 authorize("/api/apartamentos/**", hasAnyRole("SINDICO", "ADMIN"))
                 
+                // controle de acesso de visitantes (portaria)
+                authorize("/api/acessos/**", hasAnyRole("PORTARIA", "SINDICO", "ADMIN"))
+                authorize(HttpMethod.GET, "/api/autorizacoes/**", authenticated)
+                authorize("/api/autorizacoes/**", hasAnyRole("MORADOR", "SINDICO", "ADMIN"))
+                authorize(HttpMethod.GET, "/api/listas/**", authenticated)
+                authorize("/api/listas/**", hasAnyRole("MORADOR", "SINDICO", "ADMIN"))
+                authorize(HttpMethod.GET, "/api/feriados/**", authenticated)
+                authorize("/api/feriados/**", hasAnyRole("SINDICO", "ADMIN"))
+
                 // visitantes
                 authorize(HttpMethod.GET, "/api/visitantes/**", authenticated)
                 authorize(HttpMethod.DELETE, "/api/visitantes/**", hasAnyRole("MORADOR", "ADMIN"))

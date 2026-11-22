@@ -1,0 +1,75 @@
+### Cliente HTTP do IntelliJ. Suba com: ./gradlew bootRun --args='--spring.profiles.active=teste'
+@host = http://localhost:8080
+
+### 1. Login do ADMIN (copie o token devolvido para @admin)
+POST {{host}}/auth/signin
+Content-Type: application/json
+
+{ "email": "admin@condominio.com", "senha": "admin123" }
+
+### 2. Define o relógio de teste (dia útil, 10:00)
+PUT {{host}}/admin/teste/relogio
+Authorization: Bearer {{admin}}
+Content-Type: application/json
+
+{ "dataHora": "2026-12-01T10:00:00" }
+
+### 3. Restaura a massa-base B0 (anote os ids devolvidos)
+POST {{host}}/admin/teste/massa-b0
+Authorization: Bearer {{admin}}
+
+### 4. Login da portaria P01 (copie o token para @portaria)
+POST {{host}}/auth/signin
+Content-Type: application/json
+
+{ "email": "portaria.p01@teste.local", "senha": "Teste@123" }
+
+### 5. Consulta (passos 1 a 4). Troque unidadeId/visitanteId pelos ids da massa
+POST {{host}}/api/acessos/avaliar
+Authorization: Bearer {{portaria}}
+Content-Type: application/json
+
+{ "visitanteId": 1, "unidadeId": 1, "documento": "DOC-V01" }
+
+### 6. Confirma a entrada (passos 5 e 6). autorizacaoId vem de "autorizacaoId" na consulta
+POST {{host}}/api/acessos/entrada
+Authorization: Bearer {{portaria}}
+Content-Type: application/json
+
+{ "autorizacaoId": 1, "documento": "DOC-V01" }
+
+### 7. Registra a saída (passos 7 e 8). Use o id do registro devolvido na entrada
+PUT {{host}}/api/acessos/1/saida
+Authorization: Bearer {{portaria}}
+
+### 8. Login do responsável R01 (copie o token para @responsavel)
+POST {{host}}/auth/signin
+Content-Type: application/json
+
+{ "email": "responsavel.r01@teste.local", "senha": "Teste@123" }
+
+### 9. Cancela a autorização A01 (RN05)
+PUT {{host}}/api/autorizacoes/1/cancelar
+Authorization: Bearer {{responsavel}}
+
+### 10. Atualiza a lista da unidade (RN01); atualizadaEm é opcional e não pode ser futura
+PUT {{host}}/api/listas/1
+Authorization: Bearer {{responsavel}}
+Content-Type: application/json
+
+{ "visitanteIds": [1, 2], "atualizadaEm": "2026-06-01" }
+
+### 11. Concede nova autorização (RN02 e RN03)
+POST {{host}}/api/autorizacoes
+Authorization: Bearer {{responsavel}}
+Content-Type: application/json
+
+{ "visitanteId": 1, "unidadeId": 1, "dataInicio": "2026-12-01", "dataFim": "2026-12-15",
+  "horaInicio": "08:00:00", "horaFim": "18:00:00", "permiteFimSemana": false, "permiteFeriado": false }
+
+### 12. Cadastra feriado (RN02)
+POST {{host}}/api/feriados
+Authorization: Bearer {{admin}}
+Content-Type: application/json
+
+{ "data": "2026-12-25", "nome": "Natal" }
