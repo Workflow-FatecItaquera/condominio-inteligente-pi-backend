@@ -156,7 +156,7 @@ package service {
     registroRepository: RegistroAcessoRepository
     feriadoRepository: FeriadoRepository
     passwordEncoder: PasswordEncoder
-    restaurarB0(): Map<String
+    restaurarB0(revisaoLista: LocalDate?): Map<String
   }
   interface Relogio {
     agora(): LocalDateTime
@@ -221,7 +221,7 @@ package controller {
     lerRelogio(): Map<String
     definirRelogio(@RequestBody corpo: Map<String, String>): ResponseEntity<Any>
     restaurarRelogio(): Map<String
-    restaurarMassa(): Map<String
+    restaurarMassa(revisaoLista: String?): ResponseEntity<Any>
     ativarFalha(@PathVariable("ponto")
     limparFalhas(): Map<String
     lerFalhas(): Map<String

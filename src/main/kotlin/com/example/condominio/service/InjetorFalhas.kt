@@ -12,7 +12,7 @@ enum class PontoDeFalha {
 
 /**
  * Dependência controlável que permite provocar falhas nos testes de sistema
- * (CT30, CT31 e CT34) sem mexer no banco. Em produção a implementação não faz nada.
+ * (CT15 grava entrada, CT16 grava saída e CT17 consulta) sem mexer no banco. Em produção a implementação não faz nada.
  */
 interface InjetorFalhas {
     fun verificar(ponto: PontoDeFalha)

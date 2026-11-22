@@ -18,6 +18,7 @@ import com.example.condominio.security.Papeis
 import org.springframework.context.annotation.Profile
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalTime
 
 /**
@@ -48,8 +49,12 @@ class MassaTesteService(
         private const val CNPJ_TESTE = "99999999000199"
     }
 
-    /** Restaura B0 e devolve os ids criados. A tentativa padrão é no dia D, entre 09:00 e 17:00. */
-    fun restaurarB0(): Map<String, Any> {
+    /**
+     * Restaura B0 e devolve os ids criados. D é o dia do relógio de teste (na planilha, 11/11/2026).
+     * revisaoLista é opcional: sem ela a lista das unidades foi revisada em D menos 6 meses
+     * (vale até D, inclusive); com ela a lista fica revisada na data informada (CT04 e CT18).
+     */
+    fun restaurarB0(revisaoLista: LocalDate? = null): Map<String, Any> {
         val dia = relogio.agora().toLocalDate()
 
         registroRepository.deleteAll()
@@ -71,19 +76,19 @@ class MassaTesteService(
         val v01 = obterVisitante(DOCUMENTO_V01, "Visitante V01")
         val v02 = obterVisitante(DOCUMENTO_V02, "Visitante V02")
 
-        // Listas das duas unidades, atualizadas três meses antes de D, com V01 e V02
-        val revisao = dia.minusMonths(3)
+        // Listas das duas unidades com V01 e V02, revisadas em D menos 6 meses (último dia de validade = D)
+        val revisao = revisaoLista ?: dia.minusMonths(6)
         listaRepository.save(ListaAutorizados(unidade = u101, responsavel = r01, atualizadaEm = revisao, visitantes = mutableSetOf(v01, v02)))
         listaRepository.save(ListaAutorizados(unidade = u102, responsavel = r01, atualizadaEm = revisao, visitantes = mutableSetOf(v01, v02)))
 
-        // A01: V01 e U101, de D-5 a D+14, 08:00 às 18:00, sem fim de semana nem feriado
+        // A01: V01 e U101, de D a D+19 (11/11 a 30/11/2026), 08:00 às 18:00, sem fim de semana nem feriado
         val a01 = autorizacaoRepository.save(
             AutorizacaoAcesso(
                 visitante = v01,
                 unidade = u101,
                 responsavel = r01,
-                dataInicio = dia.minusDays(5),
-                dataFim = dia.plusDays(14),
+                dataInicio = dia,
+                dataFim = dia.plusDays(19),
                 horaInicio = LocalTime.of(8, 0),
                 horaFim = LocalTime.of(18, 0)
             )

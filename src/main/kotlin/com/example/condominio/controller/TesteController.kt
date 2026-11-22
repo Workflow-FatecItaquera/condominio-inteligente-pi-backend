@@ -7,6 +7,7 @@ import com.example.condominio.service.RelogioControlavel
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeParseException
 
@@ -28,12 +29,16 @@ class TesteController(
         return mapOf("agora" to relogio.agora().toString())
     }
 
-    /** Corpo: {"dataHora": "2026-12-01T10:00:00"}. O tempo continua correndo a partir do valor definido. */
+    /**
+     * Corpo: {"dataHora": "2026-12-01T10:00:00"} e, opcionalmente, "congelar": true.
+     * Sem congelar o tempo continua correndo a partir do valor definido; com congelar o
+     * relógio fica parado nesse instante até o próximo ajuste ou até DELETE /relogio.
+     */
     @PutMapping("/relogio")
     fun definirRelogio(@RequestBody corpo: Map<String, String>): ResponseEntity<Any> {
         val texto = corpo["dataHora"] ?: return ResponseEntity.status(400).body("Informe dataHora")
         return try {
-            relogio.definir(LocalDateTime.parse(texto))
+            relogio.definir(LocalDateTime.parse(texto), corpo["congelar"]?.toBoolean() ?: false)
             ResponseEntity.ok(mapOf("agora" to relogio.agora().toString()))
         } catch (e: DateTimeParseException) {
             ResponseEntity.status(400).body("dataHora inválida. Use o formato 2026-12-01T10:00:00")
@@ -46,13 +51,21 @@ class TesteController(
         return mapOf("agora" to relogio.agora().toString())
     }
 
-    /** Restaura a massa-base B0 relativa ao dia atual do relógio de teste. */
+    /**
+     * Restaura a massa-base B0 relativa ao dia atual do relógio de teste. Parâmetro opcional
+     * revisaoLista (2026-05-10): data de revisão das listas das unidades (CT04 e CT18).
+     */
     @PostMapping("/massa-b0")
-    fun restaurarMassa(): Map<String, Any> {
-        return massa.restaurarB0()
+    fun restaurarMassa(@RequestParam("revisaoLista", required = false) revisaoLista: String?): ResponseEntity<Any> {
+        return try {
+            val data = revisaoLista?.let { LocalDate.parse(it) }
+            ResponseEntity.ok(massa.restaurarB0(data))
+        } catch (e: DateTimeParseException) {
+            ResponseEntity.status(400).body("revisaoLista inválida. Use o formato 2026-05-10")
+        }
     }
 
-    /** Liga uma falha induzida: CONSULTA, GRAVAR_ENTRADA ou GRAVAR_SAIDA (CT30, CT31 e CT34). */
+    /** Liga uma falha induzida: CONSULTA, GRAVAR_ENTRADA ou GRAVAR_SAIDA (CT15 grava entrada, CT16 grava saída e CT17 consulta). */
     @PutMapping("/falhas/{ponto}")
     fun ativarFalha(@PathVariable("ponto") ponto: String): ResponseEntity<Any> {
         val escolhido = PontoDeFalha.values().firstOrNull { it.name == ponto.uppercase() }
