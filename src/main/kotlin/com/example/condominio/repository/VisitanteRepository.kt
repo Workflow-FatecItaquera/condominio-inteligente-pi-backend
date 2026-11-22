@@ -12,6 +12,8 @@ interface VisitanteRepository : JpaRepository<Visitante, Long> {
 
     fun findByIdAndActiveTrue(id: Long): Visitante?
 
+    fun findFirstByDocumento(documento: String): Visitante?
+
     @Query(
         """
         SELECT v
