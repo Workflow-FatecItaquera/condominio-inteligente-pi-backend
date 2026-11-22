@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AcessoController.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.controller</a> &gt; <span class="el_source">AcessoController.kt</span></div><h1>AcessoController.kt</h1><pre class="source lang-java linenums">package com.example.condominio.controller
+
+import com.example.condominio.dto.AvaliarEntradaDTORequest
+import com.example.condominio.dto.DecisaoAcessoDTOResponse
+import com.example.condominio.dto.RegistrarEntradaDTORequest
+import com.example.condominio.dto.RegistroAcessoDTOResponse
+import com.example.condominio.mapper.ControleAcessoMapper
+import com.example.condominio.security.UserDetailImplementation
+import com.example.condominio.service.ControleAcessoService
+import com.example.condominio.service.MotivoNegacao
+import com.example.condominio.service.Relogio
+import com.example.condominio.service.StatusSaida
+import jakarta.validation.Valid
+import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
+import org.springframework.web.bind.annotation.*
+
+/** Rotas do caso de uso Controle de Acesso de Visitantes (portaria). */
+<span class="fc" id="L19">@RestController</span>
+@RequestMapping(&quot;/api/acessos&quot;)
+<span class="fc" id="L21">class AcessoController(</span>
+<span class="fc" id="L22">    private val service: ControleAcessoService,</span>
+<span class="fc" id="L23">    private val relogio: Relogio,</span>
+<span class="fc" id="L24">    private val mapper: ControleAcessoMapper</span>
+) {
+
+    /** Passos 1 a 4: consulta e avaliaÃ§Ã£o das regras. Sempre 200, exceto indisponibilidade (503). */
+    @PostMapping(&quot;/avaliar&quot;)
+    fun avaliar(@Valid @RequestBody dto: AvaliarEntradaDTORequest): ResponseEntity&lt;DecisaoAcessoDTOResponse&gt; {
+<span class="nc" id="L30">        val decisao = service.avaliarEntrada(dto.visitanteId, dto.unidadeId, dto.documento, relogio.agora())</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        val status = if (decisao.motivo == MotivoNegacao.SERVICO_INDISPONIVEL) 503 else 200</span>
+<span class="nc" id="L32">        return ResponseEntity.status(status).body(mapper.toResponse(decisao))</span>
+    }
+
+    /** Passos 5 e 6: confirma a liberaÃ§Ã£o (revalida) e grava a entrada. 201, 403, 500 ou 503. */
+    @PostMapping(&quot;/entrada&quot;)
+    fun registrarEntrada(
+        @Valid @RequestBody dto: RegistrarEntradaDTORequest,
+        authentication: Authentication
+    ): ResponseEntity&lt;Any&gt; {
+<span class="nc" id="L41">        val resultado = service.registrarEntrada(dto.autorizacaoId, idDoUsuario(authentication), dto.documento, relogio.agora())</span>
+<span class="nc" id="L42">        val registro = resultado.registro</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (registro != null) {</span>
+<span class="nc" id="L44">            return ResponseEntity.status(201).body(mapper.toResponse(registro))</span>
+        }
+<span class="nc bnc" id="L46" title="All 3 branches missed.">        val status = when (resultado.decisao.motivo) {</span>
+<span class="nc" id="L47">            MotivoNegacao.SERVICO_INDISPONIVEL -&gt; 503</span>
+<span class="nc" id="L48">            MotivoNegacao.FALHA_AO_GRAVAR -&gt; 500</span>
+<span class="nc" id="L49">            else -&gt; 403</span>
+        }
+<span class="nc" id="L51">        return ResponseEntity.status(status).body(mapper.toResponse(resultado.decisao))</span>
+    }
+
+    /** Passos 7 e 8: registra a saÃ­da no mesmo registro da entrada. */
+    @PutMapping(&quot;/{id}/saida&quot;)
+    fun registrarSaida(
+        @PathVariable(&quot;id&quot;) id: Long,
+        authentication: Authentication
+    ): ResponseEntity&lt;Any&gt; {
+<span class="nc" id="L60">        val resultado = service.registrarSaida(id, idDoUsuario(authentication), relogio.agora())</span>
+<span class="nc bnc" id="L61" title="All 4 branches missed.">        return when (resultado.status) {</span>
+            StatusSaida.REGISTRADA -&gt;
+<span class="nc" id="L63">                ResponseEntity.ok(mapper.toResponse(resultado.registro!!))</span>
+            StatusSaida.NAO_ENCONTRADO -&gt;
+<span class="nc" id="L65">                ResponseEntity.status(404).body(&quot;Registro de acesso com id: $id nÃ£o foi encontrado&quot;)</span>
+            StatusSaida.JA_ENCERRADA -&gt;
+<span class="nc" id="L67">                ResponseEntity.status(409).body(&quot;A saÃ­da deste registro jÃ¡ foi registrada&quot;)</span>
+            StatusSaida.FALHA_AO_GRAVAR -&gt;
+<span class="nc" id="L69">                ResponseEntity.status(500).body(&quot;Falha ao gravar a saÃ­da. A visita continua em aberto&quot;)</span>
+        }
+    }
+
+    @GetMapping
+    fun lerTodos(): List&lt;RegistroAcessoDTOResponse&gt; {
+<span class="nc" id="L75">        return service.lerRegistros().map { mapper.toResponse(it) }</span>
+    }
+
+    @GetMapping(&quot;/abertos&quot;)
+    fun lerAbertos(): List&lt;RegistroAcessoDTOResponse&gt; {
+<span class="nc" id="L80">        return service.lerAbertos().map { mapper.toResponse(it) }</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    fun lerPorId(@PathVariable(&quot;id&quot;) id: Long): ResponseEntity&lt;RegistroAcessoDTOResponse&gt; {
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        val registro = service.lerRegistro(id) ?: return ResponseEntity.status(404).build()</span>
+<span class="nc" id="L86">        return ResponseEntity.ok(mapper.toResponse(registro))</span>
+    }
+
+    private fun idDoUsuario(authentication: Authentication): Long {
+<span class="nc" id="L90">        val principal = authentication.principal</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (principal is UserDetailImplementation) {</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">            return principal.usuario.id ?: 0L</span>
+        }
+<span class="nc" id="L94">        return 0L</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

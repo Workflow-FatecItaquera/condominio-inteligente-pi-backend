@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AcessoDTOs.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.dto</a> &gt; <span class="el_source">AcessoDTOs.kt</span></div><h1>AcessoDTOs.kt</h1><pre class="source lang-java linenums">package com.example.condominio.dto
+
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Positive
+import jakarta.validation.constraints.PastOrPresent
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+
+/** Passos 1 a 4: portaria informa visitante (id ou sÃ³ o documento), unidade e documento apresentado. */
+<span class="nc" id="L12">data class AvaliarEntradaDTORequest(</span>
+<span class="nc" id="L13">    val visitanteId: Long? = null,</span>
+
+<span class="nc" id="L15">    @field:Positive(message = &quot;O campo unidadeId precisa ser informado&quot;)</span>
+<span class="nc" id="L16">    val unidadeId: Long = 0,</span>
+
+<span class="nc" id="L18">    @field:NotBlank(message = &quot;O campo documento precisa ser preenchido&quot;)</span>
+<span class="nc" id="L19">    val documento: String = &quot;&quot;</span>
+<span class="nc" id="L20">)</span>
+
+/** Passos 5 e 6: confirmaÃ§Ã£o da liberaÃ§Ã£o (revalida as regras antes de gravar). */
+<span class="nc" id="L23">data class RegistrarEntradaDTORequest(</span>
+<span class="nc" id="L24">    @field:Positive(message = &quot;O campo autorizacaoId precisa ser informado&quot;)</span>
+<span class="nc" id="L25">    val autorizacaoId: Long = 0,</span>
+
+<span class="nc" id="L27">    @field:NotBlank(message = &quot;O campo documento precisa ser preenchido&quot;)</span>
+<span class="nc" id="L28">    val documento: String = &quot;&quot;</span>
+<span class="nc" id="L29">)</span>
+
+<span class="nc" id="L31">data class DecisaoAcessoDTOResponse(</span>
+<span class="nc" id="L32">    val permitido: Boolean = false,</span>
+<span class="nc" id="L33">    val motivo: String? = null,</span>
+<span class="nc" id="L34">    val mensagem: String = &quot;&quot;,</span>
+<span class="nc" id="L35">    val autorizacaoId: Long? = null</span>
+<span class="nc" id="L36">)</span>
+
+<span class="nc" id="L38">data class RegistroAcessoDTOResponse(</span>
+<span class="nc" id="L39">    val id: Long = 0,</span>
+<span class="nc" id="L40">    val autorizacaoId: Long = 0,</span>
+<span class="nc" id="L41">    val visitanteId: Long = 0,</span>
+<span class="nc" id="L42">    val visitanteNome: String = &quot;&quot;,</span>
+<span class="nc" id="L43">    val unidadeId: Long = 0,</span>
+<span class="nc" id="L44">    val porteiroId: Long = 0,</span>
+<span class="nc" id="L45">    val entradaEm: LocalDateTime? = null,</span>
+<span class="nc" id="L46">    val saidaEm: LocalDateTime? = null,</span>
+<span class="nc" id="L47">    val porteiroSaidaId: Long? = null</span>
+<span class="nc" id="L48">)</span>
+
+<span class="nc" id="L50">data class AutorizacaoDTORequest(</span>
+<span class="nc" id="L51">    @field:Positive(message = &quot;O campo visitanteId precisa ser informado&quot;)</span>
+<span class="nc" id="L52">    val visitanteId: Long = 0,</span>
+
+<span class="nc" id="L54">    @field:Positive(message = &quot;O campo unidadeId precisa ser informado&quot;)</span>
+<span class="nc" id="L55">    val unidadeId: Long = 0,</span>
+
+<span class="nc" id="L57">    @field:NotNull(message = &quot;O campo dataInicio precisa ser informado&quot;)</span>
+<span class="nc" id="L58">    val dataInicio: LocalDate? = null,</span>
+
+<span class="nc" id="L60">    @field:NotNull(message = &quot;O campo dataFim precisa ser informado&quot;)</span>
+<span class="nc" id="L61">    val dataFim: LocalDate? = null,</span>
+
+<span class="nc" id="L63">    @field:NotNull(message = &quot;O campo horaInicio precisa ser informado&quot;)</span>
+<span class="nc" id="L64">    val horaInicio: LocalTime? = null,</span>
+
+<span class="nc" id="L66">    @field:NotNull(message = &quot;O campo horaFim precisa ser informado&quot;)</span>
+<span class="nc" id="L67">    val horaFim: LocalTime? = null,</span>
+
+<span class="nc" id="L69">    val permiteFimSemana: Boolean = false,</span>
+<span class="nc" id="L70">    val permiteFeriado: Boolean = false</span>
+<span class="nc" id="L71">)</span>
+
+<span class="nc" id="L73">data class AutorizacaoDTOResponse(</span>
+<span class="nc" id="L74">    val id: Long = 0,</span>
+<span class="nc" id="L75">    val visitanteId: Long = 0,</span>
+<span class="nc" id="L76">    val unidadeId: Long = 0,</span>
+<span class="nc" id="L77">    val responsavelId: Long? = null,</span>
+<span class="nc" id="L78">    val dataInicio: LocalDate? = null,</span>
+<span class="nc" id="L79">    val dataFim: LocalDate? = null,</span>
+<span class="nc" id="L80">    val horaInicio: LocalTime? = null,</span>
+<span class="nc" id="L81">    val horaFim: LocalTime? = null,</span>
+<span class="nc" id="L82">    val permiteFimSemana: Boolean = false,</span>
+<span class="nc" id="L83">    val permiteFeriado: Boolean = false,</span>
+<span class="nc" id="L84">    val canceladaEm: LocalDateTime? = null,</span>
+<span class="nc" id="L85">    val estado: String = &quot;&quot;</span>
+<span class="nc" id="L86">)</span>
+
+<span class="nc" id="L88">data class ListaAutorizadosDTORequest(</span>
+<span class="nc" id="L89">    val visitanteIds: List&lt;Long&gt; = emptyList(),</span>
+
+<span class="nc" id="L91">    @field:PastOrPresent(message = &quot;A data de atualizaÃ§Ã£o nÃ£o pode ser futura&quot;)</span>
+<span class="nc" id="L92">    val atualizadaEm: LocalDate? = null</span>
+<span class="nc" id="L93">)</span>
+
+<span class="nc" id="L95">data class ListaAutorizadosDTOResponse(</span>
+<span class="nc" id="L96">    val id: Long = 0,</span>
+<span class="nc" id="L97">    val unidadeId: Long = 0,</span>
+<span class="nc" id="L98">    val atualizadaEm: LocalDate? = null,</span>
+<span class="nc" id="L99">    val validaAte: LocalDate? = null,</span>
+<span class="nc" id="L100">    val visitanteIds: List&lt;Long&gt; = emptyList()</span>
+<span class="nc" id="L101">)</span>
+
+<span class="nc" id="L103">data class FeriadoDTORequest(</span>
+<span class="nc" id="L104">    @field:NotNull(message = &quot;O campo data precisa ser informado&quot;)</span>
+<span class="nc" id="L105">    val data: LocalDate? = null,</span>
+
+<span class="nc" id="L107">    @field:NotBlank(message = &quot;O campo nome precisa ser preenchido&quot;)</span>
+<span class="nc" id="L108">    val nome: String = &quot;&quot;</span>
+<span class="nc" id="L109">)</span>
+
+<span class="nc" id="L111">data class FeriadoDTOResponse(</span>
+<span class="nc" id="L112">    val id: Long = 0,</span>
+<span class="nc" id="L113">    val data: LocalDate? = null,</span>
+<span class="nc" id="L114">    val nome: String = &quot;&quot;</span>
+<span class="nc" id="L115">)</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OcorrenciaMapper.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.mapper</a> &gt; <span class="el_source">OcorrenciaMapper.kt</span></div><h1>OcorrenciaMapper.kt</h1><pre class="source lang-java linenums">package com.example.condominio.mapper
+
+import com.example.condominio.dto.OcorrenciaDTORequest
+import com.example.condominio.dto.OcorrenciaDTOResponse
+import com.example.condominio.model.Condominio
+import com.example.condominio.model.Ocorrencia
+import org.springframework.stereotype.Component
+
+<span class="fc" id="L9">@Component</span>
+class OcorrenciaMapper {
+
+    fun toModel(ocorrenciaDto: OcorrenciaDTORequest): Ocorrencia {
+<span class="nc" id="L13">        return Ocorrencia(</span>
+<span class="nc" id="L14">            id = null,</span>
+<span class="nc" id="L15">            condominio = Condominio(id = ocorrenciaDto.condominioId),</span>
+<span class="nc" id="L16">            descricao = ocorrenciaDto.descricao,</span>
+<span class="nc" id="L17">            categoria = ocorrenciaDto.categoria,</span>
+<span class="nc" id="L18">            status = ocorrenciaDto.status</span>
+        )
+    }
+
+    fun toResponse(ocorrencia: Ocorrencia): OcorrenciaDTOResponse {
+<span class="nc" id="L23">        return OcorrenciaDTOResponse(</span>
+<span class="nc bnc" id="L24" title="All 2 branches missed.">            id = ocorrencia.id ?: 0,</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">            condominioId = ocorrencia.condominio.id ?: 0,</span>
+<span class="nc" id="L26">            descricao = ocorrencia.descricao,</span>
+<span class="nc" id="L27">            categoria = ocorrencia.categoria,</span>
+<span class="nc" id="L28">            status = ocorrencia.status,</span>
+<span class="nc" id="L29">            criadaEm = ocorrencia.criadaEm,</span>
+<span class="nc" id="L30">            active = ocorrencia.active</span>
+        )
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

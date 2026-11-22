@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TesteController.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.controller</a> &gt; <span class="el_source">TesteController.kt</span></div><h1>TesteController.kt</h1><pre class="source lang-java linenums">package com.example.condominio.controller
+
+import com.example.condominio.service.FalhasControlaveis
+import com.example.condominio.service.MassaTesteService
+import com.example.condominio.service.PontoDeFalha
+import com.example.condominio.service.RelogioControlavel
+import org.springframework.context.annotation.Profile
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeParseException
+
+/**
+ * Apoio aos testes de sistema. Existe somente com o perfil &quot;teste&quot; e fica sob /admin
+ * (exige papel ADMIN), entÃ£o nunca Ã© publicado junto com o ambiente de produÃ§Ã£o.
+ */
+<span class="nc" id="L18">@RestController</span>
+@RequestMapping(&quot;/admin/teste&quot;)
+@Profile(&quot;teste&quot;)
+<span class="nc" id="L21">class TesteController(</span>
+<span class="nc" id="L22">    private val relogio: RelogioControlavel,</span>
+<span class="nc" id="L23">    private val massa: MassaTesteService,</span>
+<span class="nc" id="L24">    private val falhas: FalhasControlaveis</span>
+) {
+
+    @GetMapping(&quot;/relogio&quot;)
+    fun lerRelogio(): Map&lt;String, String&gt; {
+<span class="nc" id="L29">        return mapOf(&quot;agora&quot; to relogio.agora().toString())</span>
+    }
+
+    /**
+     * Corpo: {&quot;dataHora&quot;: &quot;2026-12-01T10:00:00&quot;} e, opcionalmente, &quot;congelar&quot;: true.
+     * Sem congelar o tempo continua correndo a partir do valor definido; com congelar o
+     * relÃ³gio fica parado nesse instante atÃ© o prÃ³ximo ajuste ou atÃ© DELETE /relogio.
+     */
+    @PutMapping(&quot;/relogio&quot;)
+    fun definirRelogio(@RequestBody corpo: Map&lt;String, String&gt;): ResponseEntity&lt;Any&gt; {
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        val texto = corpo[&quot;dataHora&quot;] ?: return ResponseEntity.status(400).body(&quot;Informe dataHora&quot;)</span>
+<span class="nc" id="L40">        return try {</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">            relogio.definir(LocalDateTime.parse(texto), corpo[&quot;congelar&quot;]?.toBoolean() ?: false)</span>
+<span class="nc" id="L42">            ResponseEntity.ok(mapOf(&quot;agora&quot; to relogio.agora().toString()))</span>
+<span class="nc" id="L43">        } catch (e: DateTimeParseException) {</span>
+<span class="nc" id="L44">            ResponseEntity.status(400).body(&quot;dataHora invÃ¡lida. Use o formato 2026-12-01T10:00:00&quot;)</span>
+        }
+    }
+
+    @DeleteMapping(&quot;/relogio&quot;)
+    fun restaurarRelogio(): Map&lt;String, String&gt; {
+<span class="nc" id="L50">        relogio.restaurar()</span>
+<span class="nc" id="L51">        return mapOf(&quot;agora&quot; to relogio.agora().toString())</span>
+    }
+
+    /**
+     * Restaura a massa-base B0 relativa ao dia atual do relÃ³gio de teste. ParÃ¢metro opcional
+     * revisaoLista (2026-05-10): data de revisÃ£o das listas das unidades (CT04 e CT18).
+     */
+    @PostMapping(&quot;/massa-b0&quot;)
+    fun restaurarMassa(@RequestParam(&quot;revisaoLista&quot;, required = false) revisaoLista: String?): ResponseEntity&lt;Any&gt; {
+<span class="nc" id="L60">        return try {</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">            val data = revisaoLista?.let { LocalDate.parse(it) }</span>
+<span class="nc" id="L62">            ResponseEntity.ok(massa.restaurarB0(data))</span>
+<span class="nc" id="L63">        } catch (e: DateTimeParseException) {</span>
+<span class="nc" id="L64">            ResponseEntity.status(400).body(&quot;revisaoLista invÃ¡lida. Use o formato 2026-05-10&quot;)</span>
+        }
+    }
+
+    /** Liga uma falha induzida: CONSULTA, GRAVAR_ENTRADA ou GRAVAR_SAIDA (CT15 grava entrada, CT16 grava saÃ­da e CT17 consulta). */
+    @PutMapping(&quot;/falhas/{ponto}&quot;)
+    fun ativarFalha(@PathVariable(&quot;ponto&quot;) ponto: String): ResponseEntity&lt;Any&gt; {
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        val escolhido = PontoDeFalha.values().firstOrNull { it.name == ponto.uppercase() }</span>
+<span class="nc" id="L72">            ?: return ResponseEntity.status(400).body(&quot;Ponto invÃ¡lido. Use CONSULTA, GRAVAR_ENTRADA ou GRAVAR_SAIDA&quot;)</span>
+<span class="nc" id="L73">        falhas.ativar(escolhido)</span>
+<span class="nc" id="L74">        return ResponseEntity.ok(mapOf(&quot;ativas&quot; to falhas.ativas().map { it.name }))</span>
+    }
+
+    @DeleteMapping(&quot;/falhas&quot;)
+    fun limparFalhas(): Map&lt;String, List&lt;String&gt;&gt; {
+<span class="nc" id="L79">        falhas.limpar()</span>
+<span class="nc" id="L80">        return mapOf(&quot;ativas&quot; to emptyList())</span>
+    }
+
+    @GetMapping(&quot;/falhas&quot;)
+    fun lerFalhas(): Map&lt;String, List&lt;String&gt;&gt; {
+<span class="nc" id="L85">        return mapOf(&quot;ativas&quot; to falhas.ativas().map { it.name })</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

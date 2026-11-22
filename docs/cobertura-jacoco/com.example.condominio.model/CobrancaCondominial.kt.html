@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CobrancaCondominial.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.model</a> &gt; <span class="el_source">CobrancaCondominial.kt</span></div><h1>CobrancaCondominial.kt</h1><pre class="source lang-java linenums">package com.example.condominio.model
+
+import jakarta.persistence.*
+import java.math.BigDecimal
+import java.time.LocalDate
+
+<span class="fc" id="L7">@Entity</span>
+@Table(name = &quot;cobrancas&quot;)
+<span class="fc" id="L9">data class CobrancaCondominial(</span>
+<span class="fc" id="L10">    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)</span>
+<span class="pc" id="L11">    val id: Long? = null,</span>
+
+<span class="fc" id="L13">    @ManyToOne</span>
+    @JoinColumn(name = &quot;apartamento_id&quot;, nullable = false)
+<span class="pc" id="L15">    val apartamento: Apartamento = Apartamento(),</span>
+
+<span class="fc" id="L17">    @Column(length = 7, nullable = false)</span>
+<span class="pc" id="L18">    val competencia: String = &quot;&quot;,</span>
+
+<span class="fc" id="L20">    @Column(length = 255, nullable = false)</span>
+<span class="pc" id="L21">    val descricao: String = &quot;&quot;,</span>
+
+<span class="fc" id="L23">    @Column(precision = 10, scale = 2, nullable = false)</span>
+<span class="pc" id="L24">    val valor: BigDecimal = BigDecimal.ZERO,</span>
+
+<span class="fc" id="L26">    @Column(nullable = false)</span>
+<span class="pc" id="L27">    val vencimento: LocalDate = LocalDate.now(),</span>
+
+<span class="fc" id="L29">    @Column(nullable = false)</span>
+<span class="pc" id="L30">    val active: Boolean = true</span>
+<span class="fc" id="L31">)</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

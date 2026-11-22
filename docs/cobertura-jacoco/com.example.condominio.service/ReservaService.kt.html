@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReservaService.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.service</a> &gt; <span class="el_source">ReservaService.kt</span></div><h1>ReservaService.kt</h1><pre class="source lang-java linenums">package com.example.condominio.service
+
+import com.example.condominio.model.Reserva
+import com.example.condominio.repository.ReservaRepository
+import org.springframework.stereotype.Service
+
+<span class="fc" id="L7">@Service</span>
+<span class="fc" id="L8">class ReservaService(</span>
+<span class="fc" id="L9">    private val repository: ReservaRepository</span>
+) {
+
+    fun lerTodos(): List&lt;Reserva&gt; {
+<span class="nc" id="L13">        return repository.findAllByActiveTrue()</span>
+    }
+
+    fun lerPorId(id: Long): Reserva? {
+<span class="nc" id="L17">        return repository.findByIdAndActiveTrue(id)</span>
+    }
+
+    fun cadastrar(reserva: Reserva) {
+<span class="nc" id="L21">        repository.save(reserva)</span>
+<span class="nc" id="L22">    }</span>
+
+    fun apagar(id: Long): Boolean {
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        val reserva = repository.findByIdAndActiveTrue(id) ?: return false</span>
+
+<span class="nc" id="L27">        repository.save(reserva.copy(active = false))</span>
+<span class="nc" id="L28">        return true</span>
+    }
+
+    fun atualizar(id: Long, reserva: Reserva): Boolean {
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        val existente = repository.findByIdAndActiveTrue(id)</span>
+<span class="nc" id="L33">            ?: return false</span>
+
+<span class="nc" id="L35">        repository.save(</span>
+<span class="nc" id="L36">            reserva.copy(</span>
+<span class="nc" id="L37">                id = id,</span>
+<span class="nc" id="L38">                active = existente.active</span>
+            )
+        )
+
+<span class="nc" id="L42">        return true</span>
+    }
+
+    fun buscarPorMotivo(motivo: String): List&lt;Reserva&gt; {
+<span class="nc" id="L46">    return repository.buscarPorMotivo(motivo)</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

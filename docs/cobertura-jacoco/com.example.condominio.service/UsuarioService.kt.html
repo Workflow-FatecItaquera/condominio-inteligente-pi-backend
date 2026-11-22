@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UsuarioService.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.service</a> &gt; <span class="el_source">UsuarioService.kt</span></div><h1>UsuarioService.kt</h1><pre class="source lang-java linenums">package com.example.condominio.service
+
+import com.example.condominio.model.Usuario
+import com.example.condominio.repository.UsuarioRepository
+import com.example.condominio.security.UserDetailImplementation
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.stereotype.Service
+
+<span class="fc" id="L12">@Service</span>
+<span class="fc" id="L13">class UsuarioService(</span>
+<span class="fc" id="L14">    private val repository: UsuarioRepository,</span>
+<span class="fc" id="L15">    private val passwordEncoder: PasswordEncoder</span>
+) : UserDetailsService {
+
+    override fun loadUserByUsername(email: String): UserDetails {
+<span class="nc bnc" id="L19" title="All 2 branches missed.">        val usuario = repository.findByEmail(email)</span>
+<span class="nc" id="L20">            ?: throw UsernameNotFoundException(&quot;UsuÃ¡rio nÃ£o encontrado: $email&quot;)</span>
+<span class="nc" id="L21">        return UserDetailImplementation(usuario)</span>
+    }
+
+    fun lerPorNome(nome: String): List&lt;Usuario&gt;
+    {
+<span class="nc" id="L26">        return repository.findByName(nome)</span>
+    }
+
+    fun cadastrar(usuario: Usuario): Boolean {
+<span class="pc bpc" id="L30" title="2 of 4 branches missed.">        if (repository.findByEmail(usuario.email) != null || repository.findByCpf(usuario.cpf) != null) {</span>
+<span class="nc" id="L31">            return false</span>
+        }
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">        val senhaCodificada = passwordEncoder.encode(usuario.senha) ?: return false</span>
+<span class="fc" id="L34">        repository.save(usuario.copy(senha = senhaCodificada))</span>
+<span class="fc" id="L35">        return true</span>
+    }
+
+    fun lerTodos(): List&lt;Usuario&gt; {
+<span class="nc" id="L39">        return repository.findAllByActiveTrue()</span>
+    }
+
+    fun lerPorId(id: Long): Usuario? {
+<span class="nc" id="L43">        return repository.findByIdAndActiveTrue(id)</span>
+    }
+
+    fun atualizar(id: Long, dados: Usuario): Boolean {
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        val existente = repository.findById(id).orElse(null) ?: return false</span>
+<span class="nc" id="L48">        repository.save(</span>
+<span class="nc" id="L49">            existente.copy(</span>
+<span class="nc" id="L50">                nome = dados.nome,</span>
+<span class="nc" id="L51">                cpf = dados.cpf,</span>
+<span class="nc" id="L52">                telefone = dados.telefone,</span>
+<span class="nc" id="L53">                active = dados.active,</span>
+<span class="nc" id="L54">                foto = dados.foto</span>
+            )
+        )
+<span class="nc" id="L57">        return true</span>
+    }
+
+    fun alterarPapel(id: Long, papel: String): Boolean {
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        val existente = repository.findById(id).orElse(null) ?: return false</span>
+<span class="nc" id="L62">        repository.save(existente.copy(papeis = papel))</span>
+<span class="nc" id="L63">        return true</span>
+    }
+
+    fun apagar(id: Long): Boolean {
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        val usuario = repository.findByIdAndActiveTrue(id) ?: return false</span>
+<span class="nc" id="L68">        repository.save(usuario.copy(active = false))</span>
+<span class="nc" id="L69">        return true</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

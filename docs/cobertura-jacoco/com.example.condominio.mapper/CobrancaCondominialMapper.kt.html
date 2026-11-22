@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CobrancaCondominialMapper.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.mapper</a> &gt; <span class="el_source">CobrancaCondominialMapper.kt</span></div><h1>CobrancaCondominialMapper.kt</h1><pre class="source lang-java linenums">package com.example.condominio.mapper
+
+import com.example.condominio.dto.CobrancaCondominialDTORequest
+import com.example.condominio.dto.CobrancaCondominialDTOResponse
+import com.example.condominio.model.Apartamento
+import com.example.condominio.model.CobrancaCondominial
+import org.springframework.stereotype.Component
+
+<span class="fc" id="L9">@Component</span>
+class CobrancaCondominialMapper {
+
+    fun toModel(cobrancaDto: CobrancaCondominialDTORequest): CobrancaCondominial {
+<span class="nc" id="L13">        return CobrancaCondominial(</span>
+<span class="nc" id="L14">            id = null,</span>
+<span class="nc" id="L15">            apartamento = Apartamento(id = cobrancaDto.apartamentoId),</span>
+<span class="nc" id="L16">            competencia = cobrancaDto.competencia,</span>
+<span class="nc" id="L17">            descricao = cobrancaDto.descricao,</span>
+<span class="nc" id="L18">            valor = cobrancaDto.valor,</span>
+<span class="nc" id="L19">            vencimento = cobrancaDto.vencimento,</span>
+        )
+    }
+
+    fun toResponse(cobranca: CobrancaCondominial): CobrancaCondominialDTOResponse {
+<span class="nc" id="L24">        return CobrancaCondominialDTOResponse(</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">            id = cobranca.id ?: 0,</span>
+<span class="nc bnc" id="L26" title="All 2 branches missed.">            apartamentoId = cobranca.apartamento.id ?: 0,</span>
+<span class="nc" id="L27">            competencia = cobranca.competencia,</span>
+<span class="nc" id="L28">            descricao = cobranca.descricao,</span>
+<span class="nc" id="L29">            valor = cobranca.valor,</span>
+<span class="nc" id="L30">            vencimento = cobranca.vencimento,</span>
+<span class="nc" id="L31">            active = cobranca.active</span>
+        )
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

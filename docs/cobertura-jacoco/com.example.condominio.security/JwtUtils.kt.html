@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtUtils.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.security</a> &gt; <span class="el_source">JwtUtils.kt</span></div><h1>JwtUtils.kt</h1><pre class="source lang-java linenums">package com.example.condominio.security
+
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.security.Keys
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
+import java.util.Date
+
+<span class="fc" id="L9">@Component</span>
+<span class="fc" id="L10">class JwtUtils(</span>
+    @Value(&quot;\${app.jwt.secret}&quot;) secret: String,
+<span class="fc" id="L12">    @Value(&quot;\${app.jwt.expiration}&quot;) private val expiration: Long</span>
+) {
+<span class="fc" id="L14">    private val key = Keys.hmacShaKeyFor(secret.toByteArray())</span>
+
+    fun generateToken(username: String, claims: Map&lt;String, Any&gt;): String {
+<span class="nc" id="L17">        return Jwts.builder()</span>
+<span class="nc" id="L18">            .subject(username)</span>
+<span class="nc" id="L19">            .claims(claims)</span>
+<span class="nc" id="L20">            .issuedAt(Date())</span>
+<span class="nc" id="L21">            .expiration(Date(System.currentTimeMillis() + expiration))</span>
+<span class="nc" id="L22">            .signWith(key)</span>
+<span class="nc" id="L23">            .compact()</span>
+    }
+
+    fun validateToken(token: String): Boolean {
+<span class="nc" id="L27">        return try {</span>
+<span class="nc" id="L28">            Jwts.parser().verifyWith(key).build().parseSignedClaims(token)</span>
+<span class="nc" id="L29">            true</span>
+<span class="nc" id="L30">        } catch (e: Exception) {</span>
+<span class="nc" id="L31">            false</span>
+        }
+    }
+
+    fun getUsernameFromToken(token: String): String {
+<span class="nc" id="L36">        return Jwts.parser()</span>
+<span class="nc" id="L37">            .verifyWith(key)</span>
+<span class="nc" id="L38">            .build()</span>
+<span class="nc" id="L39">            .parseSignedClaims(token)</span>
+<span class="nc" id="L40">            .payload.subject</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

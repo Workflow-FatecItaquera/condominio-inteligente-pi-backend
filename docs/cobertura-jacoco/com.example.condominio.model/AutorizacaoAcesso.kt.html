@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AutorizacaoAcesso.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.model</a> &gt; <span class="el_source">AutorizacaoAcesso.kt</span></div><h1>AutorizacaoAcesso.kt</h1><pre class="source lang-java linenums">package com.example.condominio.model
+
+import jakarta.persistence.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+
+/**
+ * AutorizaÃ§Ã£o concedida pelo responsÃ¡vel da unidade a um visitante especÃ­fico (RN03),
+ * com datas e horÃ¡rios permitidos (RN02) e possibilidade de cancelamento (RN05).
+ */
+<span class="fc" id="L12">@Entity</span>
+@Table(name = &quot;autorizacoes_acesso&quot;)
+<span class="fc" id="L14">data class AutorizacaoAcesso(</span>
+<span class="fc" id="L15">    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)</span>
+<span class="fc" id="L16">    val id: Long? = null,</span>
+
+<span class="fc" id="L18">    @ManyToOne</span>
+    @JoinColumn(name = &quot;visitante_id&quot;, nullable = false)
+<span class="fc" id="L20">    val visitante: Visitante = Visitante(),</span>
+
+<span class="fc" id="L22">    @ManyToOne</span>
+    @JoinColumn(name = &quot;unidade_id&quot;, nullable = false)
+<span class="fc" id="L24">    val unidade: Apartamento = Apartamento(),</span>
+
+<span class="fc" id="L26">    @ManyToOne</span>
+    @JoinColumn(name = &quot;responsavel_id&quot;)
+<span class="fc" id="L28">    val responsavel: Usuario? = null,</span>
+
+<span class="fc" id="L30">    @Column(nullable = false)</span>
+<span class="fc" id="L31">    val dataInicio: LocalDate = LocalDate.now(),</span>
+
+<span class="fc" id="L33">    @Column(nullable = false)</span>
+<span class="fc" id="L34">    val dataFim: LocalDate = LocalDate.now(),</span>
+
+<span class="fc" id="L36">    @Column(nullable = false)</span>
+<span class="fc" id="L37">    val horaInicio: LocalTime = LocalTime.of(0, 0, 0),</span>
+
+<span class="fc" id="L39">    @Column(nullable = false)</span>
+<span class="fc" id="L40">    val horaFim: LocalTime = LocalTime.of(23, 59, 59),</span>
+
+<span class="fc" id="L42">    @Column(nullable = false)</span>
+<span class="fc" id="L43">    val permiteFimSemana: Boolean = false,</span>
+
+<span class="fc" id="L45">    @Column(nullable = false)</span>
+<span class="fc" id="L46">    val permiteFeriado: Boolean = false,</span>
+
+<span class="fc" id="L48">    val canceladaEm: LocalDateTime? = null</span>
+<span class="fc" id="L49">) {</span>
+
+    fun estaCancelada(): Boolean {
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        return canceladaEm != null</span>
+    }
+
+    /** RN05: cancelada vale em qualquer fase; depois, sÃ³ a data decide o estado. */
+    fun estadoEm(agora: LocalDateTime): EstadoAutorizacao {
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (estaCancelada()) {</span>
+<span class="fc" id="L58">            return EstadoAutorizacao.CANCELADA</span>
+        }
+<span class="fc" id="L60">        val data = agora.toLocalDate()</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (data.isBefore(dataInicio)) {</span>
+<span class="fc" id="L62">            return EstadoAutorizacao.AGENDADA</span>
+        }
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (data.isAfter(dataFim)) {</span>
+<span class="fc" id="L65">            return EstadoAutorizacao.EXPIRADA</span>
+        }
+<span class="fc" id="L67">        return EstadoAutorizacao.VIGENTE</span>
+    }
+
+    /** RN02: data inicial e data final sÃ£o inclusivas. */
+    fun cobreData(data: LocalDate): Boolean {
+<span class="fc bfc" id="L72" title="All 4 branches covered.">        return !data.isBefore(dataInicio) &amp;&amp; !data.isAfter(dataFim)</span>
+    }
+
+    /** RN02: hora inicial e hora final sÃ£o inclusivas. */
+    fun dentroDoHorario(hora: LocalTime): Boolean {
+<span class="fc bfc" id="L77" title="All 4 branches covered.">        return !hora.isBefore(horaInicio) &amp;&amp; !hora.isAfter(horaFim)</span>
+    }
+
+    fun cancelar(agora: LocalDateTime): AutorizacaoAcesso {
+<span class="fc" id="L81">        return copy(canceladaEm = agora)</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

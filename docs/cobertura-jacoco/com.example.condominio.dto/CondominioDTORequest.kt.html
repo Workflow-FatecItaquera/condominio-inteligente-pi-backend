@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CondominioDTORequest.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.dto</a> &gt; <span class="el_source">CondominioDTORequest.kt</span></div><h1>CondominioDTORequest.kt</h1><pre class="source lang-java linenums">package com.example.condominio.dto
+
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Positive
+import jakarta.validation.constraints.Size
+
+<span class="nc" id="L8">data class CondominioDTORequest(</span>
+<span class="nc" id="L9">    @NotBlank(message = &quot;O campo nome precisa ser preenchido&quot;)</span>
+    @Size(min = 1, max = 100)
+<span class="nc" id="L11">    val nome: String = &quot;&quot;,</span>
+
+<span class="nc" id="L13">    @NotBlank(message = &quot;O campo rua precisa ser preenchido&quot;)</span>
+    @Size(max = 80)
+<span class="nc" id="L15">    val rua: String = &quot;&quot;,</span>
+
+<span class="nc" id="L17">    @Positive(message = &quot;O nÃºmero precisa ser positivo&quot;)</span>
+<span class="nc" id="L18">    val numero: Int = 0,</span>
+
+<span class="nc" id="L20">    @NotBlank(message = &quot;O campo bairro precisa ser preenchido&quot;)</span>
+    @Size(max = 80)
+<span class="nc" id="L22">    val bairro: String = &quot;&quot;,</span>
+
+<span class="nc" id="L24">    @NotBlank(message = &quot;O campo cidade precisa ser preenchido&quot;)</span>
+    @Size(max = 80)
+<span class="nc" id="L26">    val cidade: String = &quot;&quot;,</span>
+
+<span class="nc" id="L28">    @NotBlank(message = &quot;O campo cnpj precisa ser preenchido&quot;)</span>
+    @Size(max = 14)
+    @Pattern(regexp = &quot;\\d{14}&quot;, message = &quot;O CNPJ deve ter 14 dÃ­gitos, apenas nÃºmeros&quot;)
+<span class="nc" id="L31">    val cnpj: String = &quot;&quot;,</span>
+
+<span class="nc" id="L33">    @Size(max = 255)</span>
+<span class="nc" id="L34">    val foto: String? = null,</span>
+
+<span class="nc" id="L36">    val active: Boolean = true</span>
+<span class="nc" id="L37">)</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ControleAcessoMapper.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.mapper</a> &gt; <span class="el_source">ControleAcessoMapper.kt</span></div><h1>ControleAcessoMapper.kt</h1><pre class="source lang-java linenums">package com.example.condominio.mapper
+
+import com.example.condominio.dto.AutorizacaoDTOResponse
+import com.example.condominio.dto.DecisaoAcessoDTOResponse
+import com.example.condominio.dto.FeriadoDTOResponse
+import com.example.condominio.dto.ListaAutorizadosDTOResponse
+import com.example.condominio.dto.RegistroAcessoDTOResponse
+import com.example.condominio.model.AutorizacaoAcesso
+import com.example.condominio.model.Feriado
+import com.example.condominio.model.ListaAutorizados
+import com.example.condominio.model.RegistroAcesso
+import com.example.condominio.service.DecisaoAcesso
+import org.springframework.stereotype.Component
+import java.time.LocalDateTime
+
+<span class="fc" id="L16">@Component</span>
+class ControleAcessoMapper {
+
+    fun toResponse(decisao: DecisaoAcesso): DecisaoAcessoDTOResponse {
+<span class="nc" id="L20">        return DecisaoAcessoDTOResponse(</span>
+<span class="nc" id="L21">            permitido = decisao.permitido,</span>
+<span class="nc bnc" id="L22" title="All 2 branches missed.">            motivo = decisao.motivo?.name,</span>
+<span class="nc" id="L23">            mensagem = decisao.mensagem,</span>
+<span class="nc bnc" id="L24" title="All 2 branches missed.">            autorizacaoId = decisao.autorizacao?.id</span>
+        )
+    }
+
+    fun toResponse(registro: RegistroAcesso): RegistroAcessoDTOResponse {
+<span class="nc" id="L29">        return RegistroAcessoDTOResponse(</span>
+<span class="nc bnc" id="L30" title="All 2 branches missed.">            id = registro.id ?: 0,</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">            autorizacaoId = registro.autorizacao.id ?: 0,</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">            visitanteId = registro.autorizacao.visitante.id ?: 0,</span>
+<span class="nc" id="L33">            visitanteNome = registro.autorizacao.visitante.nome,</span>
+<span class="nc" id="L34">            unidadeId = registro.unidadeId,</span>
+<span class="nc" id="L35">            porteiroId = registro.porteiroId,</span>
+<span class="nc" id="L36">            entradaEm = registro.entradaEm,</span>
+<span class="nc" id="L37">            saidaEm = registro.saidaEm,</span>
+<span class="nc" id="L38">            porteiroSaidaId = registro.porteiroSaidaId</span>
+        )
+    }
+
+    fun toResponse(autorizacao: AutorizacaoAcesso, agora: LocalDateTime): AutorizacaoDTOResponse {
+<span class="nc" id="L43">        return AutorizacaoDTOResponse(</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">            id = autorizacao.id ?: 0,</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">            visitanteId = autorizacao.visitante.id ?: 0,</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">            unidadeId = autorizacao.unidade.id ?: 0,</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">            responsavelId = autorizacao.responsavel?.id,</span>
+<span class="nc" id="L48">            dataInicio = autorizacao.dataInicio,</span>
+<span class="nc" id="L49">            dataFim = autorizacao.dataFim,</span>
+<span class="nc" id="L50">            horaInicio = autorizacao.horaInicio,</span>
+<span class="nc" id="L51">            horaFim = autorizacao.horaFim,</span>
+<span class="nc" id="L52">            permiteFimSemana = autorizacao.permiteFimSemana,</span>
+<span class="nc" id="L53">            permiteFeriado = autorizacao.permiteFeriado,</span>
+<span class="nc" id="L54">            canceladaEm = autorizacao.canceladaEm,</span>
+<span class="nc" id="L55">            estado = autorizacao.estadoEm(agora).name</span>
+        )
+    }
+
+    fun toResponse(lista: ListaAutorizados): ListaAutorizadosDTOResponse {
+<span class="nc" id="L60">        return ListaAutorizadosDTOResponse(</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">            id = lista.id ?: 0,</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            unidadeId = lista.unidade.id ?: 0,</span>
+<span class="nc" id="L63">            atualizadaEm = lista.atualizadaEm,</span>
+<span class="nc" id="L64">            validaAte = lista.validaAte(),</span>
+<span class="nc" id="L65">            visitanteIds = lista.visitantes.mapNotNull { it.id }.sorted()</span>
+        )
+    }
+
+    fun toResponse(feriado: Feriado): FeriadoDTOResponse {
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        return FeriadoDTOResponse(id = feriado.id ?: 0, data = feriado.data, nome = feriado.nome)</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

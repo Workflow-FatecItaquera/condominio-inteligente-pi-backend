@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ControleAcessoService.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.service</a> &gt; <span class="el_source">ControleAcessoService.kt</span></div><h1>ControleAcessoService.kt</h1><pre class="source lang-java linenums">package com.example.condominio.service
+
+import com.example.condominio.model.AutorizacaoAcesso
+import com.example.condominio.model.RegistroAcesso
+import com.example.condominio.model.Visitante
+import com.example.condominio.repository.AutorizacaoAcessoRepository
+import com.example.condominio.repository.ListaAutorizadosRepository
+import com.example.condominio.repository.RegistroAcessoRepository
+import com.example.condominio.repository.VisitanteRepository
+import org.springframework.stereotype.Service
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
+
+/**
+ * Caso de uso &quot;Controle de Acesso de Visitantes&quot; (RN01 a RN05).
+ *
+ * Premissas adotadas (registradas no Quadro 1a):
+ *  - RN01: &quot;6 meses&quot; sÃ£o meses de calendÃ¡rio e o Ãºltimo dia Ã© inclusivo
+ *    (lista atualizada em 11/05 vale atÃ© 11/11).
+ *  - RN02: data inicial/final e hora inicial/final sÃ£o inclusivas.
+ *  - RN05: a saÃ­da continua permitida depois do cancelamento (quem entrou precisa sair).
+ */
+<span class="fc" id="L24">@Service</span>
+<span class="fc" id="L25">class ControleAcessoService(</span>
+<span class="fc" id="L26">    private val visitanteRepository: VisitanteRepository,</span>
+<span class="fc" id="L27">    private val listaRepository: ListaAutorizadosRepository,</span>
+<span class="fc" id="L28">    private val autorizacaoRepository: AutorizacaoAcessoRepository,</span>
+<span class="fc" id="L29">    private val registroRepository: RegistroAcessoRepository,</span>
+<span class="fc" id="L30">    private val calendario: CalendarioFeriados,</span>
+<span class="fc" id="L31">    private val falhas: InjetorFalhas</span>
+) {
+
+    /**
+     * Passos 2 a 4 do fluxo principal: consulta e avaliaÃ§Ã£o das regras.
+     * Se a consulta falhar, nenhuma liberaÃ§Ã£o Ã© feita (caminho C3).
+     */
+    fun avaliarEntrada(
+        visitanteId: Long?,
+        unidadeId: Long,
+        documento: String,
+        agora: LocalDateTime
+    ): DecisaoAcesso {
+<span class="fc" id="L44">        return try {</span>
+<span class="fc" id="L45">            aplicarRegras(visitanteId, unidadeId, documento, agora)</span>
+<span class="fc" id="L46">        } catch (e: Exception) {</span>
+<span class="fc" id="L47">            DecisaoAcesso.negada(</span>
+<span class="fc" id="L48">                MotivoNegacao.SERVICO_INDISPONIVEL,</span>
+<span class="fc" id="L49">                &quot;ServiÃ§o de consulta indisponÃ­vel. Nenhuma liberaÃ§Ã£o foi feita.&quot;</span>
+            )
+        }
+    }
+
+    /**
+     * Passos 5 e 6: a portaria confirma a liberaÃ§Ã£o. As condiÃ§Ãµes sÃ£o
+     * revalidadas no momento da confirmaÃ§Ã£o (RN05 pode ter mudado desde a consulta)
+     * e sÃ³ entÃ£o a entrada Ã© gravada (RN04).
+     */
+    fun registrarEntrada(
+        autorizacaoId: Long,
+        porteiroId: Long,
+        documento: String,
+        agora: LocalDateTime
+    ): ResultadoEntrada {
+<span class="fc" id="L65">        val autorizacao = autorizacaoRepository.findById(autorizacaoId).orElse(null)</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        if (autorizacao == null) {</span>
+<span class="fc" id="L67">            return ResultadoEntrada(</span>
+<span class="fc" id="L68">                DecisaoAcesso.negada(MotivoNegacao.SEM_AUTORIZACAO, &quot;AutorizaÃ§Ã£o nÃ£o encontrada&quot;)</span>
+            )
+        }
+
+<span class="fc" id="L72">        val decisao = avaliarEntrada(autorizacao.visitante.id, autorizacao.unidade.id!!, documento, agora)</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (!decisao.permitido) {</span>
+<span class="fc" id="L74">            return ResultadoEntrada(decisao)</span>
+        }
+
+<span class="fc" id="L77">        return try {</span>
+<span class="fc" id="L78">            falhas.verificar(PontoDeFalha.GRAVAR_ENTRADA)</span>
+<span class="fc" id="L79">            val liberada = decisao.autorizacao!!</span>
+<span class="fc" id="L80">            val registro = registroRepository.save(</span>
+<span class="fc" id="L81">                RegistroAcesso(</span>
+<span class="fc" id="L82">                    autorizacao = liberada,</span>
+<span class="fc" id="L83">                    unidadeId = liberada.unidade.id!!,</span>
+<span class="fc" id="L84">                    porteiroId = porteiroId,</span>
+<span class="fc" id="L85">                    entradaEm = agora</span>
+                )
+            )
+<span class="fc" id="L88">            ResultadoEntrada(decisao, registro)</span>
+<span class="fc" id="L89">        } catch (e: Exception) {</span>
+<span class="fc" id="L90">            ResultadoEntrada(</span>
+<span class="fc" id="L91">                DecisaoAcesso.negada(</span>
+<span class="fc" id="L92">                    MotivoNegacao.FALHA_AO_GRAVAR,</span>
+<span class="fc" id="L93">                    &quot;Falha ao gravar a entrada. A liberaÃ§Ã£o nÃ£o foi confirmada.&quot;</span>
+                )
+            )
+        }
+    }
+
+    /** Passos 7 e 8: a saÃ­da Ã© gravada no mesmo registro da entrada (RN04). */
+    fun registrarSaida(registroId: Long, porteiroId: Long, agora: LocalDateTime): ResultadoSaida {
+<span class="fc" id="L101">        val registro = registroRepository.findById(registroId).orElse(null)</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        if (registro == null) {</span>
+<span class="fc" id="L103">            return ResultadoSaida(StatusSaida.NAO_ENCONTRADO)</span>
+        }
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        if (!registro.visitaAberta()) {</span>
+<span class="fc" id="L106">            return ResultadoSaida(StatusSaida.JA_ENCERRADA, registro)</span>
+        }
+<span class="fc" id="L108">        return try {</span>
+<span class="fc" id="L109">            falhas.verificar(PontoDeFalha.GRAVAR_SAIDA)</span>
+<span class="fc" id="L110">            val salvo = registroRepository.save(registro.registrarSaida(agora, porteiroId))</span>
+<span class="fc" id="L111">            ResultadoSaida(StatusSaida.REGISTRADA, salvo)</span>
+<span class="fc" id="L112">        } catch (e: Exception) {</span>
+<span class="fc" id="L113">            ResultadoSaida(StatusSaida.FALHA_AO_GRAVAR, registro)</span>
+        }
+    }
+
+    fun lerRegistros(): List&lt;RegistroAcesso&gt; {
+<span class="fc" id="L118">        return registroRepository.findAll()</span>
+    }
+
+    fun lerAbertos(): List&lt;RegistroAcesso&gt; {
+<span class="fc" id="L122">        return registroRepository.findAllBySaidaEmIsNull()</span>
+    }
+
+    fun lerRegistro(id: Long): RegistroAcesso? {
+<span class="fc" id="L126">        return registroRepository.findById(id).orElse(null)</span>
+    }
+
+    // ------------------------------------------------------------------
+    // Regras. Cada condiÃ§Ã£o Ã© um if simples para que o grafo de fluxo de
+    // controle (ExercÃ­cio 8) tenha um predicado por decisÃ£o.
+    // ------------------------------------------------------------------
+    private fun aplicarRegras(
+        visitanteId: Long?,
+        unidadeId: Long,
+        documento: String,
+        agora: LocalDateTime
+    ): DecisaoAcesso {
+<span class="fc" id="L139">        falhas.verificar(PontoDeFalha.CONSULTA)</span>
+
+        // RN01: cadastro ativo e documento correspondente
+<span class="fc" id="L142">        val visitante = localizarVisitante(visitanteId, documento)</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        if (visitante == null) {</span>
+<span class="fc" id="L144">            return DecisaoAcesso.negada(MotivoNegacao.CADASTRO_NAO_ENCONTRADO, &quot;Cadastro do visitante nÃ£o encontrado&quot;)</span>
+        }
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        if (!visitante.active) {</span>
+<span class="fc" id="L147">            return DecisaoAcesso.negada(MotivoNegacao.CADASTRO_INATIVO, &quot;Cadastro do visitante inativo&quot;)</span>
+        }
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        if (!visitante.documento.equals(documento.trim(), ignoreCase = true)) {</span>
+<span class="fc" id="L150">            return DecisaoAcesso.negada(MotivoNegacao.DOCUMENTO_DIVERGENTE, &quot;Documento nÃ£o corresponde ao cadastro&quot;)</span>
+        }
+
+        // RN01: lista da unidade atualizada nos Ãºltimos 6 meses e com o visitante
+<span class="fc" id="L154">        val data = agora.toLocalDate()</span>
+<span class="fc" id="L155">        val lista = listaRepository.findFirstByUnidadeIdAndActiveTrueOrderByAtualizadaEmDescIdDesc(unidadeId)</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if (lista == null) {</span>
+<span class="fc" id="L157">            return DecisaoAcesso.negada(MotivoNegacao.FORA_DA_LISTA, &quot;A unidade nÃ£o possui lista de autorizados&quot;)</span>
+        }
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if (!lista.vigenteEm(data)) {</span>
+<span class="fc" id="L160">            return DecisaoAcesso.negada(MotivoNegacao.LISTA_VENCIDA, &quot;Lista da unidade vencida (mais de 6 meses)&quot;)</span>
+        }
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if (!lista.contem(visitante.id)) {</span>
+<span class="fc" id="L163">            return DecisaoAcesso.negada(MotivoNegacao.FORA_DA_LISTA, &quot;Visitante nÃ£o consta na lista da unidade&quot;)</span>
+        }
+
+        // RN03: autorizaÃ§Ã£o vinculada ao visitante e Ã  unidade
+<span class="fc" id="L167">        val visitanteReal = visitante.id!!</span>
+<span class="fc" id="L168">        val vinculadas = autorizacaoRepository.findAllByVisitanteIdAndUnidadeId(visitanteReal, unidadeId)</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">        if (vinculadas.isEmpty()) {</span>
+<span class="fc bfc" id="L170" title="All 4 branches covered.">            if (autorizacaoRepository.findAllByVisitanteId(visitanteReal).isNotEmpty()) {</span>
+<span class="fc" id="L171">                return DecisaoAcesso.negada(</span>
+<span class="fc" id="L172">                    MotivoNegacao.AUTORIZACAO_OUTRA_UNIDADE,</span>
+<span class="fc" id="L173">                    &quot;A autorizaÃ§Ã£o do visitante pertence a outra unidade&quot;</span>
+                )
+            }
+<span class="fc bfc" id="L176" title="All 4 branches covered.">            if (autorizacaoRepository.findAllByUnidadeId(unidadeId).isNotEmpty()) {</span>
+<span class="fc" id="L177">                return DecisaoAcesso.negada(</span>
+<span class="fc" id="L178">                    MotivoNegacao.AUTORIZACAO_OUTRA_PESSOA,</span>
+<span class="fc" id="L179">                    &quot;A autorizaÃ§Ã£o da unidade pertence a outra pessoa&quot;</span>
+                )
+            }
+<span class="fc" id="L182">            return DecisaoAcesso.negada(MotivoNegacao.SEM_AUTORIZACAO, &quot;NÃ£o hÃ¡ autorizaÃ§Ã£o para o visitante nesta unidade&quot;)</span>
+        }
+
+        // RN05: autorizaÃ§Ã£o cancelada nega mesmo dentro da validade
+<span class="fc" id="L186">        val escolhida = selecionarAutorizacao(vinculadas, data)</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        if (escolhida == null) {</span>
+<span class="fc" id="L188">            return DecisaoAcesso.negada(MotivoNegacao.AUTORIZACAO_CANCELADA, &quot;AutorizaÃ§Ã£o cancelada pelo responsÃ¡vel&quot;)</span>
+        }
+
+        // RN02: datas e horÃ¡rios permitidos
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        if (data.isBefore(escolhida.dataInicio)) {</span>
+<span class="fc" id="L193">            return DecisaoAcesso.negada(MotivoNegacao.ANTES_DO_PERIODO, &quot;Data anterior ao inÃ­cio da autorizaÃ§Ã£o&quot;)</span>
+        }
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        if (data.isAfter(escolhida.dataFim)) {</span>
+<span class="fc" id="L196">            return DecisaoAcesso.negada(MotivoNegacao.APOS_O_PERIODO, &quot;Data posterior ao fim da autorizaÃ§Ã£o&quot;)</span>
+        }
+<span class="fc bfc" id="L198" title="All 2 branches covered.">        if (!escolhida.dentroDoHorario(agora.toLocalTime())) {</span>
+<span class="fc" id="L199">            return DecisaoAcesso.negada(MotivoNegacao.FORA_DO_HORARIO, &quot;HorÃ¡rio fora da janela autorizada&quot;)</span>
+        }
+
+        // RN02: fim de semana e feriado exigem autorizaÃ§Ã£o expressa
+<span class="fc bfc" id="L203" title="All 2 branches covered.">        if (ehDiaEspecial(data)) {</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">            if (!diaEspecialAutorizado(escolhida, data)) {</span>
+<span class="fc" id="L205">                return DecisaoAcesso.negada(</span>
+<span class="fc" id="L206">                    MotivoNegacao.FIM_DE_SEMANA_OU_FERIADO_SEM_PERMISSAO,</span>
+<span class="fc" id="L207">                    &quot;Fim de semana ou feriado sem autorizaÃ§Ã£o expressa&quot;</span>
+                )
+            }
+        }
+
+<span class="fc" id="L212">        return DecisaoAcesso.permitida(escolhida)</span>
+    }
+
+    private fun localizarVisitante(visitanteId: Long?, documento: String): Visitante? {
+<span class="fc bfc" id="L216" title="All 2 branches covered.">        if (visitanteId != null) {</span>
+<span class="fc" id="L217">            return visitanteRepository.findById(visitanteId).orElse(null)</span>
+        }
+<span class="fc" id="L219">        return visitanteRepository.findFirstByDocumento(documento.trim())</span>
+    }
+
+    /**
+     * Entre as autorizaÃ§Ãµes do par visitante/unidade, ignora as canceladas e
+     * prefere a que cobre a data; sem nenhuma que cubra, usa a de maior data final
+     * (para informar se a data Ã© anterior ou posterior). Retorna null se todas
+     * estiverem canceladas.
+     */
+    private fun selecionarAutorizacao(candidatas: List&lt;AutorizacaoAcesso&gt;, data: LocalDate): AutorizacaoAcesso? {
+<span class="fc bfc" id="L229" title="All 2 branches covered.">        val ativas = candidatas.filter { !it.estaCancelada() }</span>
+<span class="pc bfc" id="L230" title="All 2 branches covered.">        return ativas.firstOrNull { it.cobreData(data) } ?: ativas.maxByOrNull { it.dataFim }</span>
+    }
+
+    private fun ehFimDeSemana(data: LocalDate): Boolean {
+<span class="fc bfc" id="L234" title="All 4 branches covered.">        return data.dayOfWeek == DayOfWeek.SATURDAY || data.dayOfWeek == DayOfWeek.SUNDAY</span>
+    }
+
+    private fun ehDiaEspecial(data: LocalDate): Boolean {
+<span class="fc bfc" id="L238" title="All 4 branches covered.">        return ehFimDeSemana(data) || calendario.ehFeriado(data)</span>
+    }
+
+    /** SÃ¡bado ou domingo exigem permiteFimSemana; feriado exige permiteFeriado (os dois, se coincidirem). */
+    private fun diaEspecialAutorizado(autorizacao: AutorizacaoAcesso, data: LocalDate): Boolean {
+<span class="fc bfc" id="L243" title="All 4 branches covered.">        if (ehFimDeSemana(data) &amp;&amp; !autorizacao.permiteFimSemana) {</span>
+<span class="fc" id="L244">            return false</span>
+        }
+<span class="fc bfc" id="L246" title="All 4 branches covered.">        if (calendario.ehFeriado(data) &amp;&amp; !autorizacao.permiteFeriado) {</span>
+<span class="fc" id="L247">            return false</span>
+        }
+<span class="fc" id="L249">        return true</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

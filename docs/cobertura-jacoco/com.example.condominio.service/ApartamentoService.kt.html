@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApartamentoService.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.service</a> &gt; <span class="el_source">ApartamentoService.kt</span></div><h1>ApartamentoService.kt</h1><pre class="source lang-java linenums">package com.example.condominio.service
+
+import com.example.condominio.model.Apartamento
+import com.example.condominio.model.Condominio
+import com.example.condominio.repository.ApartamentoRepository
+import org.springframework.stereotype.Service
+
+<span class="fc" id="L8">@Service</span>
+<span class="fc" id="L9">class ApartamentoService(</span>
+<span class="fc" id="L10">    private val repository: ApartamentoRepository</span>
+) {
+
+    fun lerTodos(): List&lt;Apartamento&gt; {
+<span class="nc" id="L14">        return repository.findAllByActiveTrue()</span>
+    }
+
+    fun lerPorId(id: Long): Apartamento? {
+<span class="nc" id="L18">        return repository.findByIdAndActiveTrue(id)</span>
+    }
+
+    fun lerPorBloco(bloco: String): List&lt;Apartamento&gt; {
+<span class="nc" id="L22">        return repository.findByBlock(bloco)</span>
+    }
+
+    fun cadastrar(apartamento: Apartamento) {
+<span class="nc" id="L26">        repository.save(apartamento)</span>
+<span class="nc" id="L27">    }</span>
+
+    fun apagar(id: Long): Boolean {
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        val apartamento = repository.findByIdAndActiveTrue(id) ?: return false</span>
+<span class="nc" id="L31">        repository.save(apartamento.copy(active = false))</span>
+<span class="nc" id="L32">        return true</span>
+    }
+
+    fun atualizar(id: Long, apartamento: Apartamento): Boolean {
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        return if (repository.existsById(id)) {</span>
+<span class="nc" id="L37">            repository.save(apartamento.copy(id = id))</span>
+<span class="nc" id="L38">            true</span>
+        } else {
+<span class="nc" id="L40">            false</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

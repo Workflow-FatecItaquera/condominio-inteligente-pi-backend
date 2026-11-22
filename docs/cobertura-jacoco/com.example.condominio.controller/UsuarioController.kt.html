@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UsuarioController.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.controller</a> &gt; <span class="el_source">UsuarioController.kt</span></div><h1>UsuarioController.kt</h1><pre class="source lang-java linenums">package com.example.condominio.controller
+
+import com.example.condominio.dto.UsuarioDTORequest
+import com.example.condominio.dto.UsuarioDTOResponse
+import com.example.condominio.dto.UsuarioPapelDTO
+import com.example.condominio.mapper.UsuarioMapper
+import com.example.condominio.service.UsuarioService
+import jakarta.validation.Valid
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+
+<span class="fc" id="L12">@RestController</span>
+@RequestMapping(&quot;/api/usuarios&quot;)
+<span class="fc" id="L14">class UsuarioController(</span>
+<span class="fc" id="L15">    private val service: UsuarioService,</span>
+<span class="fc" id="L16">    private val mapper: UsuarioMapper</span>
+) {
+
+    @GetMapping
+    fun lerTodos(): List&lt;UsuarioDTOResponse&gt; {
+<span class="nc" id="L21">        return service.lerTodos().map { mapper.toResponse(it) }</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    fun lerPorId(@PathVariable(&quot;id&quot;) id: Long): ResponseEntity&lt;UsuarioDTOResponse&gt; {
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        val usuario = service.lerPorId(id)</span>
+<span class="nc" id="L27">            ?: return ResponseEntity.status(404).build()</span>
+<span class="nc" id="L28">        return ResponseEntity.ok(mapper.toResponse(usuario))</span>
+    }
+
+    @GetMapping(&quot;/busca/{nome}&quot;)
+    fun lerPorNome(@PathVariable(&quot;nome&quot;) nome: String): ResponseEntity&lt;List&lt;UsuarioDTOResponse&gt;&gt; {
+<span class="nc" id="L33">        val usuario = service.lerPorNome(nome)</span>
+
+<span class="nc bnc" id="L35" title="All 2 branches missed.">        if (usuario.isEmpty()) {</span>
+<span class="nc" id="L36">            return ResponseEntity.status(404).build()</span>
+        }
+
+<span class="nc" id="L39">        val resposta = usuario.map {</span>
+<span class="nc" id="L40">            mapper.toResponse(it)</span>
+        }
+
+<span class="nc" id="L43">        return ResponseEntity.ok(resposta)</span>
+    }
+
+    // o Post de usuario Ã© o registro em AuthController.
+
+    @PutMapping(&quot;/{id}&quot;)
+    fun atualizar(
+        @PathVariable(&quot;id&quot;) id: Long,
+        @Valid @RequestBody usuarioDto: UsuarioDTORequest
+    ): ResponseEntity&lt;String&gt; {
+<span class="nc" id="L53">        return try {</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">            if (service.atualizar(id, mapper.toModel(usuarioDto))) {</span>
+<span class="nc" id="L55">                ResponseEntity.status(200).body(&quot;UsuÃ¡rio atualizado com sucesso&quot;)</span>
+            } else {
+<span class="nc" id="L57">                ResponseEntity.status(404).body(&quot;UsuÃ¡rio com id: $id nÃ£o foi encontrado&quot;)</span>
+            }
+<span class="nc" id="L59">        } catch (_: Exception) {</span>
+<span class="nc" id="L60">            ResponseEntity.status(500).body(&quot;Erro ao atualizar o usuÃ¡rio&quot;)</span>
+        }
+    }
+
+    @PutMapping(&quot;/{id}/papeis&quot;)
+    fun alterarPapel(
+        @PathVariable(&quot;id&quot;) id: Long,
+        @Valid @RequestBody papelDto: UsuarioPapelDTO
+    ): ResponseEntity&lt;String&gt; {
+<span class="nc" id="L69">        return try {</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">            if (service.alterarPapel(id, papelDto.papel)) {</span>
+<span class="nc" id="L71">                ResponseEntity.status(200).body(&quot;Papel do usuÃ¡rio alterado com sucesso&quot;)</span>
+            } else {
+<span class="nc" id="L73">                ResponseEntity.status(404).body(&quot;UsuÃ¡rio com id: $id nÃ£o foi encontrado&quot;)</span>
+            }
+<span class="nc" id="L75">        } catch (_: Exception) {</span>
+<span class="nc" id="L76">            ResponseEntity.status(500).body(&quot;Erro ao alterar o papel do usuÃ¡rio&quot;)</span>
+        }
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    fun apagar(@PathVariable(&quot;id&quot;) id: Long): ResponseEntity&lt;String&gt; {
+<span class="nc" id="L82">        return try {</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            if (service.apagar(id)) {</span>
+<span class="nc" id="L84">                ResponseEntity.status(200).body(&quot;UsuÃ¡rio removido com sucesso&quot;)</span>
+            } else {
+<span class="nc" id="L86">                ResponseEntity.status(404).body(&quot;UsuÃ¡rio com id: $id nÃ£o foi encontrado&quot;)</span>
+            }
+<span class="nc" id="L88">        } catch (_: Exception) {</span>
+<span class="nc" id="L89">            ResponseEntity.status(500).body(&quot;Erro ao remover o usuÃ¡rio&quot;)</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

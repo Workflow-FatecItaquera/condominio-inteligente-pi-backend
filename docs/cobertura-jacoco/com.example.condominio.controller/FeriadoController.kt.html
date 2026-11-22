@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FeriadoController.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.controller</a> &gt; <span class="el_source">FeriadoController.kt</span></div><h1>FeriadoController.kt</h1><pre class="source lang-java linenums">package com.example.condominio.controller
+
+import com.example.condominio.dto.FeriadoDTORequest
+import com.example.condominio.dto.FeriadoDTOResponse
+import com.example.condominio.mapper.ControleAcessoMapper
+import com.example.condominio.model.Feriado
+import com.example.condominio.repository.FeriadoRepository
+import jakarta.validation.Valid
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+
+/** CalendÃ¡rio de feriados usado pela RN02. */
+<span class="fc" id="L13">@RestController</span>
+@RequestMapping(&quot;/api/feriados&quot;)
+<span class="fc" id="L15">class FeriadoController(</span>
+<span class="fc" id="L16">    private val repository: FeriadoRepository,</span>
+<span class="fc" id="L17">    private val mapper: ControleAcessoMapper</span>
+) {
+
+    @GetMapping
+    fun lerTodos(): List&lt;FeriadoDTOResponse&gt; {
+<span class="nc" id="L22">        return repository.findAll().map { mapper.toResponse(it) }</span>
+    }
+
+    @PostMapping
+    fun cadastrar(@Valid @RequestBody dto: FeriadoDTORequest): ResponseEntity&lt;Any&gt; {
+<span class="nc" id="L27">        val data = dto.data!!</span>
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if (repository.existsByData(data)) {</span>
+<span class="nc" id="L29">            return ResponseEntity.status(409).body(&quot;JÃ¡ existe um feriado nesta data&quot;)</span>
+        }
+<span class="nc" id="L31">        val salvo = repository.save(Feriado(data = data, nome = dto.nome))</span>
+<span class="nc" id="L32">        return ResponseEntity.status(201).body(mapper.toResponse(salvo))</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    fun apagar(@PathVariable(&quot;id&quot;) id: Long): ResponseEntity&lt;String&gt; {
+<span class="nc bnc" id="L37" title="All 2 branches missed.">        if (!repository.existsById(id)) {</span>
+<span class="nc" id="L38">            return ResponseEntity.status(404).body(&quot;Feriado com id: $id nÃ£o foi encontrado&quot;)</span>
+        }
+<span class="nc" id="L40">        repository.deleteById(id)</span>
+<span class="nc" id="L41">        return ResponseEntity.ok(&quot;Feriado removido com sucesso&quot;)</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

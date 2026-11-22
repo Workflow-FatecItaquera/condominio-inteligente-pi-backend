@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Relogio.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.service</a> &gt; <span class="el_source">Relogio.kt</span></div><h1>Relogio.kt</h1><pre class="source lang-java linenums">package com.example.condominio.service
+
+import org.springframework.context.annotation.Profile
+import org.springframework.stereotype.Component
+import java.time.Duration
+import java.time.LocalDateTime
+
+/** DependÃªncia controlÃ¡vel: permite trocar o relÃ³gio nos testes (driver/stub). */
+interface Relogio {
+    fun agora(): LocalDateTime
+}
+
+<span class="fc" id="L13">@Component</span>
+@Profile(&quot;!teste&quot;)
+class RelogioSistema : Relogio {
+    override fun agora(): LocalDateTime {
+<span class="nc" id="L17">        return LocalDateTime.now()</span>
+    }
+}
+
+/**
+ * RelÃ³gio ajustÃ¡vel, ativo somente no perfil &quot;teste&quot;. Por padrÃ£o guarda um deslocamento em
+ * relaÃ§Ã£o ao relÃ³gio real, entÃ£o o tempo continua correndo depois do ajuste. Com
+ * congelar = true o relÃ³gio fica parado no instante definido, o que permite testar limites
+ * exatos de horÃ¡rio (por exemplo 18:00:00 e 18:00:01) e deixa as evidÃªncias determinÃ­sticas.
+ * Serve aos testes de sistema com estados por tempo (T1, T4) e limites de horÃ¡rio.
+ */
+<span class="nc" id="L28">@Component</span>
+@Profile(&quot;teste&quot;)
+class RelogioControlavel : Relogio {
+
+    @Volatile
+<span class="nc" id="L33">    private var deslocamento: Duration = Duration.ZERO</span>
+
+    @Volatile
+    private var congeladoEm: LocalDateTime? = null
+
+    override fun agora(): LocalDateTime {
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        return congeladoEm ?: LocalDateTime.now().plus(deslocamento)</span>
+    }
+
+<span class="nc" id="L42">    fun definir(alvo: LocalDateTime, congelar: Boolean = false) {</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (congelar) {</span>
+<span class="nc" id="L44">            congeladoEm = alvo</span>
+        } else {
+<span class="nc" id="L46">            congeladoEm = null</span>
+<span class="nc" id="L47">            deslocamento = Duration.between(LocalDateTime.now(), alvo)</span>
+        }
+<span class="nc" id="L49">    }</span>
+
+    fun restaurar() {
+<span class="nc" id="L52">        congeladoEm = null</span>
+<span class="nc" id="L53">        deslocamento = Duration.ZERO</span>
+<span class="nc" id="L54">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

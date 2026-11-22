@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CondominioController.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.controller</a> &gt; <span class="el_source">CondominioController.kt</span></div><h1>CondominioController.kt</h1><pre class="source lang-java linenums">package com.example.condominio.controller
+
+import com.example.condominio.dto.CondominioDTORequest
+import com.example.condominio.dto.CondominioDTOResponse
+import com.example.condominio.mapper.CondominioMapper
+import com.example.condominio.service.CondominioService
+import jakarta.validation.Valid
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+
+<span class="fc" id="L11">@RestController</span>
+@RequestMapping(&quot;/api/condominios&quot;)
+<span class="fc" id="L13">class CondominioController(</span>
+<span class="fc" id="L14">    private val service: CondominioService,</span>
+<span class="fc" id="L15">    private val mapper: CondominioMapper</span>
+) {
+
+    @GetMapping
+    fun lerTodos(): List&lt;CondominioDTOResponse&gt; {
+<span class="nc" id="L20">        return service.lerTodos().map { mapper.toResponse(it) }</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    fun lerPorId(@PathVariable(&quot;id&quot;) id: Long): ResponseEntity&lt;CondominioDTOResponse&gt; {
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        val condominio = service.lerPorId(id)</span>
+<span class="nc" id="L26">            ?: return ResponseEntity.status(404).build()</span>
+<span class="nc" id="L27">        return ResponseEntity.ok(mapper.toResponse(condominio))</span>
+    }
+
+    @GetMapping(&quot;/busca/{nome}&quot;)
+    fun lerPorNome(@PathVariable(&quot;nome&quot;) nome: String): ResponseEntity&lt;List&lt;CondominioDTOResponse&gt;&gt; {
+<span class="nc" id="L32">        val condominios = service.lerPorNome(nome)</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        if (condominios.isEmpty()) {</span>
+<span class="nc" id="L34">            return ResponseEntity.status(404).build()</span>
+        }
+<span class="nc" id="L36">        val resposta = condominios.map { mapper.toResponse(it) }</span>
+<span class="nc" id="L37">        return ResponseEntity.ok(resposta)</span>
+    }
+
+    @PostMapping
+    fun cadastrar(@Valid @RequestBody condominioDto: CondominioDTORequest): ResponseEntity&lt;String&gt; {
+<span class="nc" id="L42">        return try {</span>
+<span class="nc" id="L43">            service.cadastrar(mapper.toModel(condominioDto))</span>
+<span class="nc" id="L44">            ResponseEntity.status(201).body(&quot;CondomÃ­nio salvo com sucesso&quot;)</span>
+<span class="nc" id="L45">        } catch (_: Exception) {</span>
+<span class="nc" id="L46">            ResponseEntity.status(500).body(&quot;Erro ao salvar o condomÃ­nio&quot;)</span>
+        }
+    }
+
+    @PutMapping(&quot;/{id}&quot;)
+    fun atualizar(
+        @PathVariable(&quot;id&quot;) id: Long,
+        @Valid @RequestBody condominioDto: CondominioDTORequest
+    ): ResponseEntity&lt;String&gt; {
+<span class="nc" id="L55">        return try {</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">            if (service.atualizar(id, mapper.toModel(condominioDto))) {</span>
+<span class="nc" id="L57">                ResponseEntity.status(200).body(&quot;CondomÃ­nio atualizado com sucesso&quot;)</span>
+            } else {
+<span class="nc" id="L59">                ResponseEntity.status(404).body(&quot;CondomÃ­nio com id: $id nÃ£o foi encontrado&quot;)</span>
+            }
+<span class="nc" id="L61">        } catch (_: Exception) {</span>
+<span class="nc" id="L62">            ResponseEntity.status(500).body(&quot;Erro ao atualizar o condomÃ­nio&quot;)</span>
+        }
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    fun apagar(@PathVariable(&quot;id&quot;) id: Long): ResponseEntity&lt;String&gt; {
+<span class="nc" id="L68">        return try {</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">            if (service.apagar(id)) {</span>
+<span class="nc" id="L70">                ResponseEntity.status(200).body(&quot;CondomÃ­nio removido com sucesso&quot;)</span>
+            } else {
+<span class="nc" id="L72">                ResponseEntity.status(404).body(&quot;CondomÃ­nio com id: $id nÃ£o foi encontrado&quot;)</span>
+            }
+<span class="nc" id="L74">        } catch (_: Exception) {</span>
+<span class="nc" id="L75">            ResponseEntity.status(500).body(&quot;Erro ao remover o condomÃ­nio&quot;)</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

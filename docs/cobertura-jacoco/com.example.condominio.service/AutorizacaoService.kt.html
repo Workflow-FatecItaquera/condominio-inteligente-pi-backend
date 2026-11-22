@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AutorizacaoService.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.service</a> &gt; <span class="el_source">AutorizacaoService.kt</span></div><h1>AutorizacaoService.kt</h1><pre class="source lang-java linenums">package com.example.condominio.service
+
+import com.example.condominio.model.AutorizacaoAcesso
+import com.example.condominio.model.ListaAutorizados
+import com.example.condominio.repository.ApartamentoRepository
+import com.example.condominio.repository.AutorizacaoAcessoRepository
+import com.example.condominio.repository.ListaAutorizadosRepository
+import com.example.condominio.repository.UsuarioRepository
+import com.example.condominio.repository.VisitanteRepository
+import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+
+/**
+ * ManutenÃ§Ã£o das autorizaÃ§Ãµes (RN02, RN03, RN05) e da lista de visitantes
+ * autorizados da unidade (RN01).
+ */
+<span class="fc" id="L19">@Service</span>
+<span class="fc" id="L20">class AutorizacaoService(</span>
+<span class="fc" id="L21">    private val autorizacaoRepository: AutorizacaoAcessoRepository,</span>
+<span class="fc" id="L22">    private val listaRepository: ListaAutorizadosRepository,</span>
+<span class="fc" id="L23">    private val visitanteRepository: VisitanteRepository,</span>
+<span class="fc" id="L24">    private val apartamentoRepository: ApartamentoRepository,</span>
+<span class="fc" id="L25">    private val usuarioRepository: UsuarioRepository</span>
+) {
+
+    /**
+     * Concede a autorizaÃ§Ã£o vinculada a um visitante e a uma unidade (RN03).
+     * Devolve null se o visitante ou a unidade nÃ£o existirem (ou estiverem inativos).
+     * LanÃ§a IllegalArgumentException se a data ou a hora final for anterior Ã  inicial (RN02).
+     */
+    fun conceder(
+        visitanteId: Long,
+        unidadeId: Long,
+        responsavelId: Long?,
+        dataInicio: LocalDate,
+        dataFim: LocalDate,
+        horaInicio: LocalTime,
+        horaFim: LocalTime,
+        permiteFimSemana: Boolean,
+        permiteFeriado: Boolean
+    ): AutorizacaoAcesso? {
+<span class="fc bfc" id="L44" title="All 4 branches covered.">        require(!dataFim.isBefore(dataInicio)) { &quot;A data final nÃ£o pode ser anterior Ã  data inicial&quot; }</span>
+<span class="fc bfc" id="L45" title="All 4 branches covered.">        require(!horaFim.isBefore(horaInicio)) { &quot;O horÃ¡rio final nÃ£o pode ser anterior ao horÃ¡rio inicial&quot; }</span>
+
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        val visitante = visitanteRepository.findByIdAndActiveTrue(visitanteId) ?: return null</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        val unidade = apartamentoRepository.findByIdAndActiveTrue(unidadeId) ?: return null</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        val responsavel = responsavelId?.let { usuarioRepository.findByIdAndActiveTrue(it) }</span>
+
+<span class="fc" id="L51">        return autorizacaoRepository.save(</span>
+<span class="fc" id="L52">            AutorizacaoAcesso(</span>
+<span class="fc" id="L53">                visitante = visitante,</span>
+<span class="fc" id="L54">                unidade = unidade,</span>
+<span class="fc" id="L55">                responsavel = responsavel,</span>
+<span class="fc" id="L56">                dataInicio = dataInicio,</span>
+<span class="fc" id="L57">                dataFim = dataFim,</span>
+<span class="fc" id="L58">                horaInicio = horaInicio,</span>
+<span class="fc" id="L59">                horaFim = horaFim,</span>
+<span class="fc" id="L60">                permiteFimSemana = permiteFimSemana,</span>
+<span class="fc" id="L61">                permiteFeriado = permiteFeriado</span>
+            )
+        )
+    }
+
+    /**
+     * RN05: o responsÃ¡vel pode cancelar a qualquer momento. Cancelar de novo mantÃ©m
+     * o primeiro cancelamento. Devolve false se a autorizaÃ§Ã£o nÃ£o existe.
+     */
+    fun cancelar(autorizacaoId: Long, agora: LocalDateTime): Boolean {
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        val autorizacao = autorizacaoRepository.findById(autorizacaoId).orElse(null) ?: return false</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (autorizacao.estaCancelada()) {</span>
+<span class="fc" id="L73">            return true</span>
+        }
+<span class="fc" id="L75">        autorizacaoRepository.save(autorizacao.cancelar(agora))</span>
+<span class="fc" id="L76">        return true</span>
+    }
+
+    /**
+     * RN01: cria uma nova versÃ£o da lista da unidade com os visitantes ativos informados
+     * (inexistentes ou inativos sÃ£o ignorados). Devolve null se a unidade nÃ£o existe.
+     */
+    fun revisarLista(
+        unidadeId: Long,
+        visitanteIds: List&lt;Long&gt;,
+        responsavelId: Long?,
+        atualizadaEm: LocalDate
+    ): ListaAutorizados? {
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        val unidade = apartamentoRepository.findByIdAndActiveTrue(unidadeId) ?: return null</span>
+<span class="fc" id="L90">        val visitantes = visitanteIds</span>
+<span class="fc" id="L91">            .mapNotNull { visitanteRepository.findByIdAndActiveTrue(it) }</span>
+<span class="fc" id="L92">            .toMutableSet()</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        val responsavel = responsavelId?.let { usuarioRepository.findByIdAndActiveTrue(it) }</span>
+
+<span class="fc" id="L95">        return listaRepository.save(</span>
+<span class="fc" id="L96">            ListaAutorizados(</span>
+<span class="fc" id="L97">                unidade = unidade,</span>
+<span class="fc" id="L98">                responsavel = responsavel,</span>
+<span class="fc" id="L99">                atualizadaEm = atualizadaEm,</span>
+<span class="fc" id="L100">                visitantes = visitantes</span>
+            )
+        )
+    }
+
+    fun lerAutorizacao(id: Long): AutorizacaoAcesso? {
+<span class="fc" id="L106">        return autorizacaoRepository.findById(id).orElse(null)</span>
+    }
+
+    fun lerAutorizacoes(): List&lt;AutorizacaoAcesso&gt; {
+<span class="fc" id="L110">        return autorizacaoRepository.findAll()</span>
+    }
+
+    fun lerListaVigente(unidadeId: Long): ListaAutorizados? {
+<span class="fc" id="L114">        return listaRepository.findFirstByUnidadeIdAndActiveTrueOrderByAtualizadaEmDescIdDesc(unidadeId)</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

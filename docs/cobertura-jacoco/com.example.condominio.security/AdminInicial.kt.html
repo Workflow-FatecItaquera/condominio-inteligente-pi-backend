@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminInicial.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.security</a> &gt; <span class="el_source">AdminInicial.kt</span></div><h1>AdminInicial.kt</h1><pre class="source lang-java linenums">package com.example.condominio.security
+
+import com.example.condominio.model.Usuario
+import com.example.condominio.service.UsuarioService
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.CommandLineRunner
+import org.springframework.stereotype.Component
+import java.time.LocalDateTime
+
+<span class="fc" id="L10">@Component</span>
+<span class="fc" id="L11">class AdminInicial(</span>
+<span class="fc" id="L12">    private val service: UsuarioService,</span>
+<span class="fc" id="L13">    @Value(&quot;\${app.admin.nome:Administrador}&quot;) private val nome: String,</span>
+<span class="fc" id="L14">    @Value(&quot;\${app.admin.cpf:00000000000}&quot;) private val cpf: String,</span>
+<span class="fc" id="L15">    @Value(&quot;\${app.admin.telefone:99999999}&quot;) private val telefone: String,</span>
+<span class="fc" id="L16">    @Value(&quot;\${app.admin.email:admin@condominio.com}&quot;) private val email: String,</span>
+<span class="fc" id="L17">    @Value(&quot;\${app.admin.senha:admin123}&quot;) private val senha: String</span>
+) : CommandLineRunner {
+
+    override fun run(vararg args: String) {
+<span class="fc" id="L21">        val admin = Usuario(</span>
+<span class="fc" id="L22">            nome = nome,</span>
+<span class="fc" id="L23">            cpf = cpf,</span>
+<span class="fc" id="L24">            telefone = telefone,</span>
+<span class="fc" id="L25">            email = email,</span>
+<span class="fc" id="L26">            senha = senha,</span>
+<span class="fc" id="L27">            papeis = Papeis.ADMIN,</span>
+<span class="fc" id="L28">            active = true,</span>
+<span class="fc" id="L29">            dataRegistro = LocalDateTime.now()</span>
+        )
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if (service.cadastrar(admin)) {</span>
+<span class="fc" id="L32">            println(&quot;UsuÃ¡rio ADMIN inicial criado: $email&quot;)</span>
+        }
+<span class="fc" id="L34">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

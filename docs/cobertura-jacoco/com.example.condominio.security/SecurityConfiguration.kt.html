@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConfiguration.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.security</a> &gt; <span class="el_source">SecurityConfiguration.kt</span></div><h1>SecurityConfiguration.kt</h1><pre class="source lang-java linenums">package com.example.condominio.security
+
+import com.example.condominio.service.UsuarioService
+import org.springframework.beans.factory.ObjectProvider
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.invoke
+import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+
+<span class="fc" id="L18">@Configuration</span>
+<span class="fc" id="L19">class SecurityConfiguration(</span>
+<span class="fc" id="L20">    private val jwtUtils: JwtUtils,</span>
+<span class="fc" id="L21">    private val usuarioServiceProvider: ObjectProvider&lt;UsuarioService&gt;</span>
+) {
+
+    @Bean
+    fun jwtAuthenticationFilter(): JwtAuthenticationFilter {
+<span class="fc" id="L26">        return JwtAuthenticationFilter(jwtUtils, usuarioServiceProvider)</span>
+    }
+
+    @Bean
+    fun passwordEncoder(): PasswordEncoder {
+<span class="fc" id="L31">        return BCryptPasswordEncoder()</span>
+    }
+
+    @Bean
+    fun authenticationManager(
+        configuration: AuthenticationConfiguration
+    ): AuthenticationManager {
+<span class="fc" id="L38">        return configuration.authenticationManager</span>
+    }
+
+    @Bean
+    fun filterChain(http: HttpSecurity, jwtAuthenticationFilter: JwtAuthenticationFilter): SecurityFilterChain {
+<span class="fc" id="L43">        http {</span>
+<span class="fc" id="L44">            csrf { disable() }</span>
+<span class="fc" id="L45">            formLogin { disable() }</span>
+<span class="fc" id="L46">            sessionManagement { sessionCreationPolicy = SessionCreationPolicy.STATELESS }</span>
+<span class="fc" id="L47">            authorizeHttpRequests {</span>
+<span class="fc" id="L48">                authorize(&quot;/auth/**&quot;, permitAll)</span>
+<span class="fc" id="L49">                authorize(&quot;/public/**&quot;, permitAll)</span>
+<span class="fc" id="L50">                authorize(&quot;/admin/**&quot;, hasRole(&quot;ADMIN&quot;))</span>
+
+                // usuÃ¡rios
+<span class="fc" id="L53">                authorize(HttpMethod.PUT, &quot;/api/usuarios/*/papeis&quot;, hasRole(&quot;ADMIN&quot;))</span>
+<span class="fc" id="L54">                authorize(HttpMethod.GET, &quot;/api/usuarios/**&quot;, hasAnyRole(&quot;PORTARIA&quot;, &quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+<span class="fc" id="L55">                authorize(HttpMethod.PUT, &quot;/api/usuarios/**&quot;, hasAnyRole(&quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+<span class="fc" id="L56">                authorize(HttpMethod.DELETE, &quot;/api/usuarios/**&quot;, hasRole(&quot;ADMIN&quot;))</span>
+
+                // condomÃ­nios
+<span class="fc" id="L59">                authorize(HttpMethod.GET, &quot;/api/condominios/**&quot;, authenticated)</span>
+<span class="fc" id="L60">                authorize(HttpMethod.PUT, &quot;/api/condominios/**&quot;, hasAnyRole(&quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+<span class="fc" id="L61">                authorize(&quot;/api/condominios/**&quot;, hasRole(&quot;ADMIN&quot;))</span>
+
+                // cobranÃ§as, pagamentos e despesas
+<span class="fc" id="L64">                authorize(HttpMethod.GET, &quot;/api/cobrancas/**&quot;, hasAnyRole(&quot;MORADOR&quot;, &quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+<span class="fc" id="L65">                authorize(&quot;/api/cobrancas/**&quot;, hasAnyRole(&quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+<span class="fc" id="L66">                authorize(&quot;/api/pagamentos/**&quot;, hasAnyRole(&quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+<span class="fc" id="L67">                authorize(&quot;/api/despesas/**&quot;, hasAnyRole(&quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+
+                // apartamentos
+<span class="fc" id="L70">                authorize(HttpMethod.GET, &quot;/api/apartamentos/**&quot;, authenticated)</span>
+<span class="fc" id="L71">                authorize(&quot;/api/apartamentos/**&quot;, hasAnyRole(&quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+                
+                // controle de acesso de visitantes (portaria)
+<span class="fc" id="L74">                authorize(&quot;/api/acessos/**&quot;, hasAnyRole(&quot;PORTARIA&quot;, &quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+<span class="fc" id="L75">                authorize(HttpMethod.GET, &quot;/api/autorizacoes/**&quot;, authenticated)</span>
+<span class="fc" id="L76">                authorize(&quot;/api/autorizacoes/**&quot;, hasAnyRole(&quot;MORADOR&quot;, &quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+<span class="fc" id="L77">                authorize(HttpMethod.GET, &quot;/api/listas/**&quot;, authenticated)</span>
+<span class="fc" id="L78">                authorize(&quot;/api/listas/**&quot;, hasAnyRole(&quot;MORADOR&quot;, &quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+<span class="fc" id="L79">                authorize(HttpMethod.GET, &quot;/api/feriados/**&quot;, authenticated)</span>
+<span class="fc" id="L80">                authorize(&quot;/api/feriados/**&quot;, hasAnyRole(&quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+
+                // visitantes
+<span class="fc" id="L83">                authorize(HttpMethod.GET, &quot;/api/visitantes/**&quot;, authenticated)</span>
+<span class="fc" id="L84">                authorize(HttpMethod.DELETE, &quot;/api/visitantes/**&quot;, hasAnyRole(&quot;MORADOR&quot;, &quot;ADMIN&quot;))</span>
+<span class="fc" id="L85">                authorize(&quot;/api/visitantes/**&quot;, hasAnyRole(&quot;MORADOR&quot;, &quot;PORTARIA&quot;, &quot;ADMIN&quot;))</span>
+
+                // reservas
+<span class="fc" id="L88">                authorize(HttpMethod.GET, &quot;/api/reservas/**&quot;, authenticated)</span>
+<span class="fc" id="L89">                authorize(&quot;/api/reservas/**&quot;, hasAnyRole(&quot;MORADOR&quot;, &quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+
+                // Ã¡reas comuns
+<span class="fc" id="L92">                authorize(HttpMethod.GET, &quot;/api/areascomuns/**&quot;, authenticated)</span>
+<span class="fc" id="L93">                authorize(&quot;/api/areascomuns/**&quot;, hasAnyRole(&quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+
+                // encomendas
+<span class="fc" id="L96">                authorize(HttpMethod.GET, &quot;/api/encomendas/**&quot;, authenticated)</span>
+<span class="fc" id="L97">                authorize(HttpMethod.DELETE, &quot;/api/encomendas/**&quot;, hasRole(&quot;ADMIN&quot;))</span>
+<span class="fc" id="L98">                authorize(&quot;/api/encomendas/**&quot;, hasAnyRole(&quot;PORTARIA&quot;, &quot;ADMIN&quot;))</span>
+
+                // ocorrÃªncias
+<span class="fc" id="L101">                authorize(HttpMethod.GET, &quot;/api/ocorrencias/**&quot;, authenticated)</span>
+<span class="fc" id="L102">                authorize(HttpMethod.POST, &quot;/api/ocorrencias/**&quot;, authenticated)</span>
+<span class="fc" id="L103">                authorize(&quot;/api/ocorrencias/**&quot;, hasAnyRole(&quot;SINDICO&quot;, &quot;ADMIN&quot;))</span>
+
+
+<span class="fc" id="L106">                authorize(anyRequest, authenticated)</span>
+<span class="fc" id="L107">            }</span>
+<span class="fc" id="L108">            addFilterBefore&lt;UsernamePasswordAuthenticationFilter&gt;(jwtAuthenticationFilter)</span>
+<span class="fc" id="L109">        }</span>
+<span class="fc" id="L110">        return http.build()</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

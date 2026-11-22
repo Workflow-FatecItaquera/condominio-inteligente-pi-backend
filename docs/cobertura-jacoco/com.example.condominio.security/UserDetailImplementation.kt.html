@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserDetailImplementation.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.security</a> &gt; <span class="el_source">UserDetailImplementation.kt</span></div><h1>UserDetailImplementation.kt</h1><pre class="source lang-java linenums">package com.example.condominio.security
+
+import com.example.condominio.model.Usuario
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.userdetails.UserDetails
+
+<span class="nc" id="L8">class UserDetailImplementation(</span>
+<span class="nc" id="L9">    val usuario: Usuario</span>
+) : UserDetails {
+
+    override fun getPassword(): String {
+<span class="nc" id="L13">        return usuario.senha</span>
+    }
+
+    override fun getUsername(): String {
+<span class="nc" id="L17">        return usuario.email</span>
+    }
+
+    override fun isEnabled(): Boolean {
+<span class="nc" id="L21">        return usuario.active</span>
+    }
+
+    override fun getAuthorities(): Collection&lt;GrantedAuthority&gt; {
+<span class="nc" id="L25">        return usuario.papeis.split(&quot;,&quot;).map { papel -&gt;</span>
+<span class="nc" id="L26">            SimpleGrantedAuthority(&quot;ROLE_${papel.trim()}&quot;)</span>
+        }
+    }
+
+<span class="nc" id="L30">    override fun isCredentialsNonExpired(): Boolean { return true }</span>
+<span class="nc" id="L31">    override fun isAccountNonExpired(): Boolean { return true }</span>
+<span class="nc" id="L32">    override fun isAccountNonLocked(): Boolean { return true }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

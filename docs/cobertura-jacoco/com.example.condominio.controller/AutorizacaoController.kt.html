@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AutorizacaoController.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.controller</a> &gt; <span class="el_source">AutorizacaoController.kt</span></div><h1>AutorizacaoController.kt</h1><pre class="source lang-java linenums">package com.example.condominio.controller
+
+import com.example.condominio.dto.AutorizacaoDTORequest
+import com.example.condominio.dto.AutorizacaoDTOResponse
+import com.example.condominio.dto.ListaAutorizadosDTORequest
+import com.example.condominio.dto.ListaAutorizadosDTOResponse
+import com.example.condominio.mapper.ControleAcessoMapper
+import com.example.condominio.security.UserDetailImplementation
+import com.example.condominio.service.AutorizacaoService
+import com.example.condominio.service.Relogio
+import jakarta.validation.Valid
+import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
+import org.springframework.web.bind.annotation.*
+
+/** ManutenÃ§Ã£o de autorizaÃ§Ãµes e listas pelo proprietÃ¡rio/responsÃ¡vel. */
+<span class="fc" id="L17">@RestController</span>
+@RequestMapping(&quot;/api&quot;)
+<span class="fc" id="L19">class AutorizacaoController(</span>
+<span class="fc" id="L20">    private val service: AutorizacaoService,</span>
+<span class="fc" id="L21">    private val relogio: Relogio,</span>
+<span class="fc" id="L22">    private val mapper: ControleAcessoMapper</span>
+) {
+
+    @PostMapping(&quot;/autorizacoes&quot;)
+    fun conceder(
+        @Valid @RequestBody dto: AutorizacaoDTORequest,
+        authentication: Authentication
+    ): ResponseEntity&lt;Any&gt; {
+<span class="nc" id="L30">        return try {</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">            val autorizacao = service.conceder(</span>
+<span class="nc" id="L32">                dto.visitanteId,</span>
+<span class="nc" id="L33">                dto.unidadeId,</span>
+<span class="nc" id="L34">                idDoUsuario(authentication),</span>
+<span class="nc" id="L35">                dto.dataInicio!!,</span>
+<span class="nc" id="L36">                dto.dataFim!!,</span>
+<span class="nc" id="L37">                dto.horaInicio!!,</span>
+<span class="nc" id="L38">                dto.horaFim!!,</span>
+<span class="nc" id="L39">                dto.permiteFimSemana,</span>
+<span class="nc" id="L40">                dto.permiteFeriado</span>
+<span class="nc" id="L41">            ) ?: return ResponseEntity.status(404).body(&quot;Visitante ou unidade nÃ£o encontrados&quot;)</span>
+<span class="nc" id="L42">            ResponseEntity.status(201).body(mapper.toResponse(autorizacao, relogio.agora()))</span>
+<span class="nc" id="L43">        } catch (e: IllegalArgumentException) {</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">            ResponseEntity.status(400).body(e.message ?: &quot;PerÃ­odo invÃ¡lido&quot;)</span>
+        }
+    }
+
+    @GetMapping(&quot;/autorizacoes&quot;)
+    fun lerTodas(): List&lt;AutorizacaoDTOResponse&gt; {
+<span class="nc" id="L50">        val agora = relogio.agora()</span>
+<span class="nc" id="L51">        return service.lerAutorizacoes().map { mapper.toResponse(it, agora) }</span>
+    }
+
+    @GetMapping(&quot;/autorizacoes/{id}&quot;)
+    fun lerPorId(@PathVariable(&quot;id&quot;) id: Long): ResponseEntity&lt;AutorizacaoDTOResponse&gt; {
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        val autorizacao = service.lerAutorizacao(id) ?: return ResponseEntity.status(404).build()</span>
+<span class="nc" id="L57">        return ResponseEntity.ok(mapper.toResponse(autorizacao, relogio.agora()))</span>
+    }
+
+    /** RN05: cancelamento a qualquer momento. */
+    @PutMapping(&quot;/autorizacoes/{id}/cancelar&quot;)
+    fun cancelar(@PathVariable(&quot;id&quot;) id: Long): ResponseEntity&lt;String&gt; {
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        return if (service.cancelar(id, relogio.agora())) {</span>
+<span class="nc" id="L64">            ResponseEntity.ok(&quot;AutorizaÃ§Ã£o cancelada com sucesso&quot;)</span>
+<span class="nc" id="L65">        } else {</span>
+<span class="nc" id="L66">            ResponseEntity.status(404).body(&quot;AutorizaÃ§Ã£o com id: $id nÃ£o foi encontrada&quot;)</span>
+        }
+    }
+
+    /** RN01: atualizaÃ§Ã£o da lista de autorizados da unidade. */
+    @PutMapping(&quot;/listas/{unidadeId}&quot;)
+    fun revisarLista(
+        @PathVariable(&quot;unidadeId&quot;) unidadeId: Long,
+        @Valid @RequestBody dto: ListaAutorizadosDTORequest,
+        authentication: Authentication
+    ): ResponseEntity&lt;Any&gt; {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        val atualizadaEm = dto.atualizadaEm ?: relogio.agora().toLocalDate()</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        val lista = service.revisarLista(unidadeId, dto.visitanteIds, idDoUsuario(authentication), atualizadaEm)</span>
+<span class="nc" id="L79">            ?: return ResponseEntity.status(404).body(&quot;Unidade com id: $unidadeId nÃ£o foi encontrada&quot;)</span>
+<span class="nc" id="L80">        return ResponseEntity.ok(mapper.toResponse(lista))</span>
+    }
+
+    @GetMapping(&quot;/listas/{unidadeId}&quot;)
+    fun lerLista(@PathVariable(&quot;unidadeId&quot;) unidadeId: Long): ResponseEntity&lt;ListaAutorizadosDTOResponse&gt; {
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        val lista = service.lerListaVigente(unidadeId) ?: return ResponseEntity.status(404).build()</span>
+<span class="nc" id="L86">        return ResponseEntity.ok(mapper.toResponse(lista))</span>
+    }
+
+    private fun idDoUsuario(authentication: Authentication): Long? {
+<span class="nc" id="L90">        val principal = authentication.principal</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (principal is UserDetailImplementation) {</span>
+<span class="nc" id="L92">            return principal.usuario.id</span>
+        }
+<span class="nc" id="L94">        return null</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

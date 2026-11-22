@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReservaDTORequest.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">condominio</a> &gt; <a href="index.source.html" class="el_package">com.example.condominio.dto</a> &gt; <span class="el_source">ReservaDTORequest.kt</span></div><h1>ReservaDTORequest.kt</h1><pre class="source lang-java linenums">package com.example.condominio.dto
+
+import jakarta.validation.constraints.Future
+import jakarta.validation.constraints.FutureOrPresent
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Positive
+import jakarta.validation.constraints.Size
+import java.time.LocalDateTime
+
+<span class="nc" id="L10">data class ReservaDTORequest(</span>
+<span class="nc" id="L11">    @Positive(message = &quot;O campo usuarioId precisa ser informado&quot;)</span>
+<span class="nc" id="L12">    val usuarioId: Long = 0,</span>
+
+<span class="nc" id="L14">    @Positive(message = &quot;O campo areaComumId precisa ser informado&quot;)</span>
+<span class="nc" id="L15">    val areaComumId: Long = 0,</span>
+
+<span class="nc" id="L17">    @FutureOrPresent</span>
+<span class="nc" id="L18">    val inicio: LocalDateTime = LocalDateTime.now(),</span>
+
+<span class="nc" id="L20">    @Future</span>
+<span class="nc" id="L21">    val fim: LocalDateTime = LocalDateTime.now(),</span>
+<span class="nc" id="L22">    @NotBlank(message = &quot;O campo motivo precisa ser informado&quot;)</span>
+    
+    @Size(max = 30, message = &quot;O campo motivo deve ter no mÃ¡ximo 30 caracteres&quot;)
+<span class="nc" id="L25">    val motivo: String = &quot;&quot;,</span>
+
+<span class="nc" id="L27">    val active: Boolean = true,</span>
+    
+<span class="nc" id="L29">    @Size(max = 30, message = &quot;O campo recorrÃªncia precisa ser informado&quot;)</span>
+<span class="nc" id="L30">    val recorrencia: String = &quot;&quot;,</span>
+
+<span class="nc" id="L32">)</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
